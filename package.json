@@ -1,0 +1,133 @@
+{
+	"name": "importerrorlist",
+	"displayName": "ImportErrorList",
+	"description": "ImportErrorList vscode",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.84.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:importerrorlist.helloWorld"
+	],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "importerrorlist.helloWorld",
+				"title": "Hello World"
+			},
+
+			{
+				"command": "nodeDependencies.refreshEntry",
+				"title": "Refresh(リフレッシュ)",
+				"icon": {
+				  "light": "resources/light/refresh.svg",
+				  "dark": "resources/dark/refresh.svg"
+				}
+			},
+
+			{
+				"command": "nodeDependencies.fileEntry",
+				"title": "Init(初期化)",
+				"icon": {
+					"light": "resources/light/document.svg",
+					"dark": "resources/dark/document.svg"
+				}
+			},
+
+			{
+				"command": "nodeDependencies.editEntry",
+				"title": "Search Word(検索ワード)",
+				"icon": {
+					"light": "resources/light/edit.svg",
+					"dark": "resources/dark/edit.svg"
+				}
+			}	  
+		],
+
+		"views": {
+			"package-explorer": [
+				{
+					"id": "nodeDependencies",
+					"name": "List(リスト)",
+					"icon": "media/dep.svg",
+					"contextualTitle": "Package Explorer"
+				},
+				{
+					"id": "commentDependencies",
+					"name": "Comment(コメント)",
+                    "visibility": "collapsed"
+				}
+			]
+
+		},
+		
+		"viewsWelcome": [
+			{
+			  "view": "nodeDependencies",
+			  "contents": "Please open the target file (JSON)\n対象のファイル(JSON)を開いてください\n[Open File](command:openUserFile)"
+			}
+		],
+
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "package-explorer",
+					"title": "Package Explorer",
+					"icon": "media/dep.svg"
+				}
+			]
+		},
+
+		"menus": {
+			"view/title": [
+				{
+					"command": "nodeDependencies.refreshEntry",
+					"when": "view == nodeDependencies",
+					"group": "navigation"
+				},
+				{
+					"command": "nodeDependencies.fileEntry",
+					"when": "view == nodeDependencies",
+					"group": "navigation"
+				},
+				{
+					"command": "nodeDependencies.editEntry",
+					"when": "view == nodeDependencies",
+					"group": "navigation"
+				}
+			]
+		}
+				
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run package",
+		"compile": "webpack",
+		"watch": "webpack --watch",
+		"package": "webpack --mode production --devtool hidden-source-map",
+		"compile-tests": "tsc -p . --outDir out",
+		"watch-tests": "tsc -p -w . --outDir out",
+		"pretest": "npm run compile-tests && npm run compile && npm run lint",
+		"lint": "eslint src --ext ts",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/vscode": "^1.84.0",
+		"@types/glob": "^7.1.4",
+		"@types/mocha": "^9.0.0",
+		"@types/node": "14.x",
+		"@typescript-eslint/eslint-plugin": "^4.31.1",
+		"@typescript-eslint/parser": "^4.31.1",
+		"eslint": "^7.32.0",
+		"glob": "^7.1.7",
+		"mocha": "^9.1.1",
+		"typescript": "^4.4.3",
+		"ts-loader": "^9.2.5",
+		"webpack": "^5.52.1",
+		"webpack-cli": "^4.8.0",
+		"@vscode/test-electron": "^1.6.2"
+	}
+}

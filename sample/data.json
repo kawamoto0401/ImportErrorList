@@ -1,0 +1,53 @@
+{
+    "ItemOutput": {
+      "version": 1.0
+    },
+    "data": [
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
+            "subject" : "test Subject",
+            "description" : "test Description",
+            "row" : 1,
+            "column" : 1,
+            "comment" : "test Comment",
+            "level" : 1,
+            "tooltip" : "",
+            "tags" : ""
+        },
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
+            "subject" : "test Subject",
+            "description" : "test Description",
+            "row" : 2,
+            "column" : 2,
+            "comment" : "test Comment",
+            "level" : 1,
+            "tooltip" : "",
+            "tags" : ""
+        },
+
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
+            "subject" : "test Subject2",
+            "description" : "test Description",
+            "row" : 3,
+            "column" : 3,
+            "comment" : "test Comment",
+            "level" : 1,
+            "tooltip" : "",
+            "tags" : ""
+        },
+
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
+            "subject" : "test Subject2",
+            "description" : "test Description",
+            "row" : 4,
+            "column" : 4,
+            "comment" : "test Comment",
+            "level" : 1,
+            "tooltip" : "",
+            "tags" : ""
+        }
+    ]
+}
