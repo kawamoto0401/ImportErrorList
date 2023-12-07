@@ -51,7 +51,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	// searchWord : string;
 	id : number;
 
-	constructor(private workspaceRoot: string | undefined, private commentDependencies: DepCommentProvider ) {
+	constructor(private commentDependencies: DepCommentProvider ) {
 		// this.dependency = [];
 		this.userDataList = [];
 		// this.searchWord = "";
@@ -65,15 +65,15 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	}
 
 	// 初期化
-	getFile(): void {
-		vscode.window.showInformationMessage('getFile:');
+	initTreeview(): void {
+		vscode.window.showInformationMessage('initTreeview:');
 		// this.dependency.length = 0;
 		this.userDataList.length = 0;
 		this.refresh();
 	}
 
-	getEdit(): void {
-		vscode.window.showInformationMessage('getEdit:');
+	searchTreeview(): void {
+		vscode.window.showInformationMessage('searchTreeview:');
 
 		const name = vscode.window.showInputBox({ title : 'Search Word'});
 		if( !name ) {
@@ -122,10 +122,10 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 	//
 	getChildren(element?: Dependency): Thenable<Dependency[]> {
-		if (!this.workspaceRoot) {
-			vscode.window.showInformationMessage('No dependency in empty workspace');
-			return Promise.resolve([]);
-		}
+		// if (!this.workspaceRoot) {
+		// 	vscode.window.showInformationMessage('No dependency in empty workspace');
+		// 	return Promise.resolve([]);
+		// }
 
 		if (element) {
 			// 子ツリーの表示
@@ -208,7 +208,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					const id = nodeIDList[index];
 
 					data.push(new Dependency(element, "", "", "", vscode.TreeItemCollapsibleState.None, {
-						command: 'extension.openPackageOnNpm',
+						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
 				}
@@ -261,8 +261,8 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	}
 
 	// 選択されたtreeview
-	gettest(element?: string): void {
-		vscode.window.showInformationMessage('gettest');
+	getTreeviewSelect(element?: string): void {
+		vscode.window.showInformationMessage('getTreeviewSelect');
 
 		for (let index = 0; index < this.userDataList.length; index++) {
 			const id = this.userDataList[index].id;
@@ -321,8 +321,11 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					}
 		
 					const jsonData = JSON.parse(fileContent);
-		
-					const version = jsonData.ItemOutput.version;
+					if(( null === jsonData ) || ( null === jsonData.ImportErrorList ) || ( null === jsonData.ImportErrorList.version )) {
+						return;
+					}
+
+					const version = jsonData.ImportErrorList.version;
 					if( 1 !== version ) {
 						return;
 					}

@@ -2,7 +2,7 @@
 	"name": "importerrorlist",
 	"displayName": "ImportErrorList",
 	"description": "ImportErrorList vscode",
-	"version": "0.0.1",
+	"version": "0.8.0",
 	"engines": {
 		"vscode": "^1.84.0"
 	},
@@ -30,7 +30,7 @@
 			},
 
 			{
-				"command": "nodeDependencies.fileEntry",
+				"command": "nodeDependencies.initTreeviewEntry",
 				"title": "Init(初期化)",
 				"icon": {
 					"light": "resources/light/document.svg",
@@ -39,7 +39,7 @@
 			},
 
 			{
-				"command": "nodeDependencies.editEntry",
+				"command": "nodeDependencies.searchTreeviewEntry",
 				"title": "Search Word(検索ワード)",
 				"icon": {
 					"light": "resources/light/edit.svg",
@@ -90,12 +90,12 @@
 					"group": "navigation"
 				},
 				{
-					"command": "nodeDependencies.fileEntry",
+					"command": "nodeDependencies.initTreeviewEntry",
 					"when": "view == nodeDependencies",
 					"group": "navigation"
 				},
 				{
-					"command": "nodeDependencies.editEntry",
+					"command": "nodeDependencies.searchTreeviewEntry",
 					"when": "view == nodeDependencies",
 					"group": "navigation"
 				}
