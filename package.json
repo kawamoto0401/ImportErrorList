@@ -60,9 +60,13 @@
 					"id": "commentDependencies",
 					"name": "Comment(コメント)",
                     "visibility": "collapsed"
+				},
+				{
+				"type": "webview",
+				"id": "example.webview",
+				"name": "WebView Sidebar"
 				}
 			]
-
 		},
 		
 		"viewsWelcome": [

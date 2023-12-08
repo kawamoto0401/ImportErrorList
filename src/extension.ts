@@ -3,9 +3,10 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-import { TestView } from './testView';
+// import { TestView } from './testView';
 import { DepNodeProvider, Dependency } from './nodeDependencies';
 import { DepCommentProvider, Dependency2 } from './commentDependencies';
+import { WebViewProvider } from './WebViewProvider';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -49,6 +50,15 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('openUserFile', async () => {
 		nodeDependenciesProvider.getjson();
 	});
+
+
+	// WebView を登録
+	context.subscriptions.push(
+	vscode.window.registerWebviewViewProvider(
+		"example.webview",
+		new WebViewProvider(context.extensionUri)
+	)
+	);
 }
 
 // this method is called when your extension is deactivated

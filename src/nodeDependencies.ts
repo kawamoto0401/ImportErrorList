@@ -337,8 +337,6 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					
 					for (let  i = 0; i < data.length; i++) {
 
-	//					this.dependency.push(new Dependency(data[i].Subject, data[i].filename, "", vscode.TreeItemCollapsibleState.Collapsed));
-
 						this.userDataList.push( new UserData(data[i].filename, data[i].subject, data[i].description, data[i].row, data[i].column, data[i].level, data[i].comment, data[i].tooltip, data[i].tags, String(this.id)));
 
 						this.id++;
