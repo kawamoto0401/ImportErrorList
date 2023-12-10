@@ -42,8 +42,8 @@
 				"command": "nodeDependencies.searchTreeviewEntry",
 				"title": "Search Word(検索ワード)",
 				"icon": {
-					"light": "resources/light/edit.svg",
-					"dark": "resources/dark/edit.svg"
+					"light": "resources/light/search.svg",
+					"dark": "resources/dark/search.svg"
 				}
 			}	  
 		],
