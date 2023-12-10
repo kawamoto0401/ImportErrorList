@@ -143,7 +143,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
 
-					data.push(new Dependency(element, "", "SubjectSub", "", vscode.TreeItemCollapsibleState.Collapsed));
+					data.push(new Dependency(element, "SubjectSub", "", vscode.TreeItemCollapsibleState.Collapsed));
 				}
 
 				return Promise.resolve( data );
@@ -168,7 +168,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
 
-					data.push(new Dependency(element, "", "FileSub", "", vscode.TreeItemCollapsibleState.Collapsed));
+					data.push(new Dependency(element, "FileSub", "", vscode.TreeItemCollapsibleState.Collapsed));
 				}
 
 				return Promise.resolve( data );
@@ -200,7 +200,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
 
-					data.push(new Dependency(element, "", "TagSub", "", vscode.TreeItemCollapsibleState.Collapsed));
+					data.push(new Dependency(element, "TagSub", "", vscode.TreeItemCollapsibleState.Collapsed));
 				}
 
 				return Promise.resolve( data );
@@ -210,6 +210,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 				var nodeList: Array<string> = [];
 				var nodeIDList: Array<string> = [];
+				var nodeIDTooltip: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const data = this.userDataList[index];
@@ -220,6 +221,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 					nodeList.push( data.filename );
 					nodeIDList.push( String(data.id) );
+					nodeIDTooltip.push( String(data.tooltip) );
 				}
 
 				var data : Dependency[] = [];
@@ -227,8 +229,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
 					const id = nodeIDList[index];
+					const tooltip = nodeIDTooltip[index];
 
-					data.push(new Dependency(element, "", "", "", vscode.TreeItemCollapsibleState.None, {
+					data.push(new Dependency(element, "", "", vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
@@ -241,6 +244,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 				var nodeList: Array<string> = [];
 				var nodeIDList: Array<string> = [];
+				var nodeIDTooltip: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const data = this.userDataList[index];
@@ -251,6 +255,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 					nodeList.push( data.subject );
 					nodeIDList.push( String(data.id) );
+					nodeIDTooltip.push( String(data.tooltip) );
 				}
 
 				var data : Dependency[] = [];
@@ -258,8 +263,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
 					const id = nodeIDList[index];
+					const tooltip = nodeIDTooltip[index];
 
-					data.push(new Dependency(element, "", "", "", vscode.TreeItemCollapsibleState.None, {
+					data.push(new Dependency(element, "", "", vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
@@ -272,6 +278,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 				var nodeList: Array<string> = [];
 				var nodeIDList: Array<string> = [];
+				var nodeIDTooltip: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const data = this.userDataList[index];
@@ -283,6 +290,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 						nodeList.push( data.subject + "：" + data.filename );
 						nodeIDList.push( String(data.id) );
+						nodeIDTooltip.push( String(data.tooltip) );
 					}
 				}
 
@@ -291,8 +299,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
 					const id = nodeIDList[index];
+					const tooltip = nodeIDTooltip[index];
 
-					data.push(new Dependency(element, "", "", "", vscode.TreeItemCollapsibleState.None, {
+					data.push(new Dependency(element, "", "", vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
@@ -309,9 +318,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			if ( 0 !== this.userDataList.length) {
 				// ファイル読み込み時
 				return Promise.resolve(
-					[new Dependency("Subject", "", "Subject", "", vscode.TreeItemCollapsibleState.Collapsed), 
-					new Dependency("File", "", "File", "", vscode.TreeItemCollapsibleState.Collapsed), 
-					new Dependency("Tag", "", "Tag", "", vscode.TreeItemCollapsibleState.Collapsed)
+					[new Dependency("Subject", "Subject", "", vscode.TreeItemCollapsibleState.Collapsed), 
+					new Dependency("File", "File", "", vscode.TreeItemCollapsibleState.Collapsed), 
+					new Dependency("Tag", "Tag", "", vscode.TreeItemCollapsibleState.Collapsed)
 				]);
 			} else {
 				// 起動時
@@ -411,9 +420,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 						if( 0 < data[i].description.length ) {
 							description = data[i].description;
 						}
-						let tooltip = data[i].filename + " : " + data[i].subject; 
+						let tooltip = data[i].subject + " : " + data[i].filename; 
 						if( 0 < data[i].tooltip.length ) {
-							tooltip = data[i].description;
+							tooltip = data[i].tooltip;
 						}
 		
 						// tagsをスペース分割する
@@ -448,22 +457,36 @@ export class Dependency extends vscode.TreeItem {
 
 	constructor(
 		public readonly label: string,
-		private readonly version: string,
 		public readonly type: string,
 		public readonly id: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+		public readonly tooltip?: string,
 		public readonly command?: vscode.Command
 	) {
 		super(label, collapsibleState);
 
-		this.tooltip = `${this.label}-${this.version}`;
-		this.description = this.version;
+		this.tooltip = tooltip;
+		// this.description = this.version;
+
+		if( "" === type ) {
+			// TODO:レベルによってアイコンを変更する
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', 'resources', 'light', 'file_r.svg'),
+				dark: path.join(__filename, '..', '..', 'resources', 'dark', 'file_r.svg')
+			};
+		}
+		else {
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', 'resources', 'light', 'folder.svg'),
+				dark: path.join(__filename, '..', '..', 'resources', 'dark', 'folder.svg')
+			};
+		}	
 	}
 
-	iconPath = {
-		light: path.join(__filename, '..', '..', 'resources', 'light', 'dependency.svg'),
-		dark: path.join(__filename, '..', '..', 'resources', 'dark', 'dependency.svg')
-	};
+	// iconPath = {
+	// 	light: path.join(__filename, '..', '..', 'resources', 'light', 'file_r.svg'),
+	// 	dark: path.join(__filename, '..', '..', 'resources', 'dark', 'file_r.svg')
+	// };
 
 	contextValue = 'dependency';
 }
