@@ -2,8 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { DepCommentProvider, Dependency2 } from './commentDependencies';
-
+import { WebViewProvider } from './WebViewProvider';
 
 class UserData {
 	constructor(
@@ -46,19 +45,15 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	private _onDidChangeTreeData: vscode.EventEmitter<Dependency | undefined | void> = new vscode.EventEmitter<Dependency | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<Dependency | undefined | void> = this._onDidChangeTreeData.event;
 
-	// dependency : Dependency[];
 	userDataList: Array<UserData>;
-	// searchWord : string;
 	id : number;
 
-	constructor(private commentDependencies: DepCommentProvider ) {
-		// this.dependency = [];
+	constructor(private webViewProvider: WebViewProvider ) {
 		this.userDataList = [];
-		// this.searchWord = "";
 		this.id = 1000;
 	}
 
-	//
+	// 
 	refresh(): void {
 		vscode.window.showInformationMessage('refresh:');
 		this._onDidChangeTreeData.fire();
@@ -72,6 +67,8 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 		this.refresh();
 	}
 
+	// ツリー検索
+	// 検索用の画面を表示、ツリービューに反映する
 	searchTreeview(): void {
 		vscode.window.showInformationMessage('searchTreeview:');
 
@@ -114,19 +111,16 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 		});
 	}
 
-	//
+	// ツリーの表示
+	// 
 	getTreeItem(element: Dependency): vscode.TreeItem {
 		vscode.window.showInformationMessage('element:' + element.label);
 		return element;
 	}
 
-	//
+	// 子ツリーの表示
+	// 
 	getChildren(element?: Dependency): Thenable<Dependency[]> {
-		// if (!this.workspaceRoot) {
-		// 	vscode.window.showInformationMessage('No dependency in empty workspace');
-		// 	return Promise.resolve([]);
-		// }
-
 		if (element) {
 			// 子ツリーの表示
 			if( "Subject" === element.type ) {
@@ -182,10 +176,37 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			} else if ("Tag" === element.type) {
 				vscode.window.showInformationMessage('Tab');
 
-				return Promise.resolve([]);
+				let nodeList: Array<string> = [];
+
+				for (let index = 0; index < this.userDataList.length; index++) {
+					const element = this.userDataList[index];
+
+					for (let index2 = 0; index2 < this.userDataList.length; index2++) {
+						const str : string = element.tags[index2];
+						if( undefined === str ) {
+							continue;
+						}
+
+						if( nodeList.indexOf( str ) > -1 ) {
+							continue;
+						}
+
+						nodeList.push( str );
+					}
+				}
+
+				let data : Dependency[] = [];
+
+				for (let index = 0; index < nodeList.length; index++) {
+					const element = nodeList[index];
+
+					data.push(new Dependency(element, "", "TagSub", "", vscode.TreeItemCollapsibleState.Collapsed));
+				}
+
+				return Promise.resolve( data );
 
 			} else if ("SubjectSub" === element.type) {
-				vscode.window.showInformationMessage('Subject : ' + element.label );
+				vscode.window.showInformationMessage('Subject Children : ' + element.label );
 
 				var nodeList: Array<string> = [];
 				var nodeIDList: Array<string> = [];
@@ -216,9 +237,10 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				return Promise.resolve( data );
 
 			} else if ("FileSub" === element.type) {
-				vscode.window.showInformationMessage('FileSub : ' + element.label );
+				vscode.window.showInformationMessage('File Children : ' + element.label );
 
 				var nodeList: Array<string> = [];
+				var nodeIDList: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const data = this.userDataList[index];
@@ -228,14 +250,52 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					}
 
 					nodeList.push( data.subject );
+					nodeIDList.push( String(data.id) );
 				}
 
 				var data : Dependency[] = [];
 
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
+					const id = nodeIDList[index];
 
-					data.push(new Dependency(element, "", "", "", vscode.TreeItemCollapsibleState.None));
+					data.push(new Dependency(element, "", "", "", vscode.TreeItemCollapsibleState.None, {
+						command: 'extension.getTreeviewSelect',
+						title: '',
+						arguments: [id]}));
+				}
+
+				return Promise.resolve( data );				
+
+			} else if ("TagSub" === element.type) {
+				vscode.window.showInformationMessage('Tag Children : ' + element.label );
+
+				var nodeList: Array<string> = [];
+				var nodeIDList: Array<string> = [];
+
+				for (let index = 0; index < this.userDataList.length; index++) {
+					const data = this.userDataList[index];
+					for (let index2 = 0; index2 < data.tags.length; index2++) {
+
+						if( element.label !== data.tags[index2] ) {
+							continue;
+						}
+
+						nodeList.push( data.subject + "：" + data.filename );
+						nodeIDList.push( String(data.id) );
+					}
+				}
+
+				var data : Dependency[] = [];
+
+				for (let index = 0; index < nodeList.length; index++) {
+					const element = nodeList[index];
+					const id = nodeIDList[index];
+
+					data.push(new Dependency(element, "", "", "", vscode.TreeItemCollapsibleState.None, {
+						command: 'extension.getTreeviewSelect',
+						title: '',
+						arguments: [id]}));
 				}
 
 				return Promise.resolve( data );				
@@ -260,7 +320,8 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 		}
 	}
 
-	// 選択されたtreeview
+	// Treeviewが選択された
+	// 選択のelementからIDを取得してWebviewに反映
 	getTreeviewSelect(element?: string): void {
 		vscode.window.showInformationMessage('getTreeviewSelect');
 
@@ -268,14 +329,19 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			const id = this.userDataList[index].id;
 			if( element === id ) {
 
-				// 
-				let str : string;
+				// Webviewに反映させる
+				let description = '-';
+				let comment = '-';
 
-				if( undefined !== this.userDataList[index].comment ) {
-					this.commentDependencies.setComment(this.userDataList[index].comment);
-				}else {
-					this.commentDependencies.setComment("");				
+				if( undefined !== this.userDataList[index].description ) {
+					description = this.userDataList[index].description;
 				}
+				if( undefined !== this.userDataList[index].comment ) {
+					comment = this.userDataList[index].comment;
+				}
+
+				this.webViewProvider.chgComment(description, comment);
+
 
 				const filename = this.userDataList[index].filename;
 				const row = this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0 ;
@@ -332,12 +398,29 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 		
 					const data = jsonData.data;
 
-					// this.dependency = [];
+					// 現在のtreeviewを破棄する
 					this.userDataList = [];
 					
 					for (let  i = 0; i < data.length; i++) {
 
-						this.userDataList.push( new UserData(data[i].filename, data[i].subject, data[i].description, data[i].row, data[i].column, data[i].level, data[i].comment, data[i].tooltip, data[i].tags, String(this.id)));
+						let subject = "No subject"; 
+						if( 0 < data[i].subject.length ) {
+							subject = data[i].subject;
+						}
+						let description = "No description"; 
+						if( 0 < data[i].description.length ) {
+							description = data[i].description;
+						}
+						let tooltip = data[i].filename + " : " + data[i].subject; 
+						if( 0 < data[i].tooltip.length ) {
+							tooltip = data[i].description;
+						}
+		
+						// tagsをスペース分割する
+						const tag : string  = data[i].tags;
+						const tagllist : Array<string> = tag.split(/(\s+)/).filter( e => e.trim().length > 0);
+	
+						this.userDataList.push( new UserData(data[i].filename, subject, description, data[i].row, data[i].column, data[i].level, data[i].comment, tooltip, tagllist, String(this.id)));
 
 						this.id++;
 					}

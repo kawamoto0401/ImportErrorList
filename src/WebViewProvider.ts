@@ -2,16 +2,20 @@ import * as vscode from "vscode";
 
 export class WebViewProvider implements vscode.WebviewViewProvider {
 
-    private view?: vscode.WebviewView;
+  private view?: vscode.WebviewView;
 
-    constructor(private extensionUri: vscode.Uri) {}
+  constructor(private extensionUri: vscode.Uri) { }
 
-
+  //
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     this.view = webviewView;
-    
-    // WebViewで表示したいHTMLを設定します
-    webviewView.webview.html = `
+
+    webviewView.title = 'Comment';
+    webviewView.webview.html = this.getWebviewContent('-', '-');
+  }
+
+  public getWebviewContent(description : string, commnent: string) {
+    return `
       <!DOCTYPE html>
       <html lang="ja">
       <head>
@@ -20,18 +24,21 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
         <title>WebView Example</title>
       </head>
       <body>
-        <textarea id="comment" cols="30" rows="10" readonly>Hello</textarea>
+      <label fot="description">${description}</label>
+      <br>
+      <label fot="commnent">${commnent}</label>
       </body>
       </html>
     `;
   }
 
-  public setComment(commnent : string ) {
-    //     document.getElementById('story').innerHTML = 'It was a dark and stormy night…';
-//    this.view?.webview.postMessage({
-//         type: 'POST',
-//         body: entries
-//     });
-    
+  public chgComment(description : string, commnent: string) {
+
+    if (this.view) {
+      // 改行コードを判定し、HTMLの<BR>に変換する
+      const newComment = commnent.replace(/\r?\n/g, '<br>');
+
+      this.view.webview.html = this.getWebviewContent(description, newComment);
+    }
   }
 }

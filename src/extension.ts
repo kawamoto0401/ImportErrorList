@@ -31,11 +31,17 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// context.subscriptions.push(disposable);
 
-	//
-	const commnetDependenciesProvider = new DepCommentProvider();
-	vscode.window.registerTreeDataProvider('commentDependencies', commnetDependenciesProvider);
+	// WebView を登録
+	const webViewProvider = new WebViewProvider(context.extensionUri)
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider( "example.webview", webViewProvider )
+		);
 
-	const nodeDependenciesProvider = new DepNodeProvider(commnetDependenciesProvider);
+	//
+	// const commnetDependenciesProvider = new DepCommentProvider();
+	// vscode.window.registerTreeDataProvider('commentDependencies', commnetDependenciesProvider);
+
+	const nodeDependenciesProvider = new DepNodeProvider(webViewProvider);
 	vscode.window.registerTreeDataProvider('nodeDependencies', nodeDependenciesProvider);
 
 	// ツリーが選択されたときを登録
@@ -52,13 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 
-	// WebView を登録
-	context.subscriptions.push(
-	vscode.window.registerWebviewViewProvider(
-		"example.webview",
-		new WebViewProvider(context.extensionUri)
-	)
-	);
+
 }
 
 // this method is called when your extension is deactivated

@@ -57,14 +57,9 @@
 					"contextualTitle": "Package Explorer"
 				},
 				{
-					"id": "commentDependencies",
-					"name": "Comment(コメント)",
-                    "visibility": "collapsed"
-				},
-				{
-				"type": "webview",
-				"id": "example.webview",
-				"name": "WebView Sidebar"
+					"type": "webview",
+					"id": "example.webview",
+					"name": "Comment(コメント)"
 				}
 			]
 		},

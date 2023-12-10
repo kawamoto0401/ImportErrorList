@@ -11,8 +11,8 @@
             "column" : 1,
             "comment" : "test Comment",
             "level" : 1,
-            "tooltip" : "",
-            "tags" : ""
+            "tooltip" : "test tooltip",
+            "tags" : "Edit Tool"
         },
         {
             "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
@@ -20,10 +20,10 @@
             "description" : "test Description",
             "row" : 2,
             "column" : 2,
-            "comment" : "test Comment",
+            "comment" : "test Comment\r\ntest Comment",
             "level" : 1,
-            "tooltip" : "",
-            "tags" : ""
+            "tooltip" : "test tooltip2",
+            "tags" : "Edit"
         },
 
         {
@@ -32,10 +32,10 @@
             "description" : "test Description",
             "row" : 3,
             "column" : 3,
-            "comment" : "test Comment",
+            "comment" : "test Comment\r\ntest Comment\r\ntest Comment",
             "level" : 1,
-            "tooltip" : "",
-            "tags" : ""
+            "tooltip" : "test tooltip3",
+            "tags" : "Tool"
         },
 
         {
@@ -44,7 +44,19 @@
             "description" : "test Description",
             "row" : 4,
             "column" : 4,
-            "comment" : "test Comment",
+            "comment" : "test Comment\ntest Comment",
+            "level" : 1,
+            "tooltip" : "",
+            "tags" : "Local"
+        },
+
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
+            "subject" : "test Subject2",
+            "description" : "test Description",
+            "row" : 4,
+            "column" : 4,
+            "comment" : "",
             "level" : 1,
             "tooltip" : "",
             "tags" : ""
