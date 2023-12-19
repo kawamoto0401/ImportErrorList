@@ -126,7 +126,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			if( "Subject" === element.type ) {
 				vscode.window.showInformationMessage('Subject');
 
-				var nodeList: Array<string> = [];
+				let nodeList: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const element = this.userDataList[index];
@@ -138,7 +138,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					nodeList.push( element.subject );
 				}
 
-				var data : Dependency[] = [];
+				nodeList.sort();
+
+				let  data : Dependency[] = [];
 
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
@@ -151,7 +153,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			} else if ( "File" === element.type ) {
 				vscode.window.showInformationMessage('File');
 
-				var nodeList: Array<string> = [];
+				let nodeList: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const element = this.userDataList[index];
@@ -163,7 +165,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					nodeList.push( element.filename );
 				}
 
-				var data : Dependency[] = [];
+				nodeList.sort();
+
+				let data : Dependency[] = [];
 
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
@@ -195,6 +199,8 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					}
 				}
 
+				nodeList.sort();
+
 				let data : Dependency[] = [];
 
 				for (let index = 0; index < nodeList.length; index++) {
@@ -208,9 +214,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			} else if ("SubjectSub" === element.type) {
 				vscode.window.showInformationMessage('Subject Children : ' + element.label );
 
-				var nodeList: Array<string> = [];
-				var nodeIDList: Array<string> = [];
-				var nodeIDTooltip: Array<string> = [];
+				let nodeList: Array<string> = [];
+				let nodeIDList: Array<string> = [];
+				let nodeIDTooltip: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const data = this.userDataList[index];
@@ -224,7 +230,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					nodeIDTooltip.push( String(data.tooltip) );
 				}
 
-				var data : Dependency[] = [];
+				nodeList.sort();
+
+				let data : Dependency[] = [];
 
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
@@ -242,9 +250,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			} else if ("FileSub" === element.type) {
 				vscode.window.showInformationMessage('File Children : ' + element.label );
 
-				var nodeList: Array<string> = [];
-				var nodeIDList: Array<string> = [];
-				var nodeIDTooltip: Array<string> = [];
+				let nodeList: Array<string> = [];
+				let nodeIDList: Array<string> = [];
+				let nodeIDTooltip: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const data = this.userDataList[index];
@@ -258,7 +266,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					nodeIDTooltip.push( String(data.tooltip) );
 				}
 
-				var data : Dependency[] = [];
+				nodeList.sort();
+
+				let data : Dependency[] = [];
 
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
@@ -276,9 +286,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			} else if ("TagSub" === element.type) {
 				vscode.window.showInformationMessage('Tag Children : ' + element.label );
 
-				var nodeList: Array<string> = [];
-				var nodeIDList: Array<string> = [];
-				var nodeIDTooltip: Array<string> = [];
+				let nodeList: Array<string> = [];
+				let nodeIDList: Array<string> = [];
+				let nodeIDTooltip: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const data = this.userDataList[index];
@@ -294,7 +304,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					}
 				}
 
-				var data : Dependency[] = [];
+				nodeList.sort();
+
+				let data : Dependency[] = [];
 
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
@@ -359,9 +371,14 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				// ファイルを開く
 				vscode.workspace.openTextDocument(filename).then(function (doc) {
 					vscode.window.showTextDocument(doc).then(function (editor) {
+
+						// 
 						let pos = new vscode.Position( row, column );
 						editor.selection = new vscode.Selection( pos, pos);
 
+						// 
+						let range = new vscode.Range(pos, pos);
+						editor.revealRange(range);
 						return;
 					});
 				});
@@ -482,11 +499,6 @@ export class Dependency extends vscode.TreeItem {
 			};
 		}	
 	}
-
-	// iconPath = {
-	// 	light: path.join(__filename, '..', '..', 'resources', 'light', 'file_r.svg'),
-	// 	dark: path.join(__filename, '..', '..', 'resources', 'dark', 'file_r.svg')
-	// };
 
 	contextValue = 'dependency';
 }
