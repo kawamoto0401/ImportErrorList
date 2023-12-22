@@ -55,13 +55,13 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 	// 
 	refresh(): void {
-		vscode.window.showInformationMessage('refresh:');
+		// vscode.window.showInformationMessage('refresh:');
 		this._onDidChangeTreeData.fire();
 	}
 
 	// 初期化
 	initTreeview(): void {
-		vscode.window.showInformationMessage('initTreeview:');
+		// vscode.window.showInformationMessage('initTreeview:');
 		// this.dependency.length = 0;
 		this.userDataList.length = 0;
 		this.refresh();
@@ -70,7 +70,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	// ツリー検索
 	// 検索用の画面を表示、ツリービューに反映する
 	searchTreeview(): void {
-		vscode.window.showInformationMessage('searchTreeview:');
+		// vscode.window.showInformationMessage('searchTreeview:');
 
 		const name = vscode.window.showInputBox({ title : 'Search Word'});
 		if( !name ) {
@@ -88,7 +88,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					vscode.window.showInformationMessage('Non Search:');
 
 				}else {
-					vscode.window.showInformationMessage(name);
+					// vscode.window.showInformationMessage(name);
 
 
 					const max = this.userDataList.length;
@@ -114,7 +114,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	// ツリーの表示
 	// 
 	getTreeItem(element: Dependency): vscode.TreeItem {
-		vscode.window.showInformationMessage('element:' + element.label);
+		// vscode.window.showInformationMessage('element:' + element.label);
 		return element;
 	}
 
@@ -124,7 +124,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 		if (element) {
 			// 子ツリーの表示
 			if( "Subject" === element.type ) {
-				vscode.window.showInformationMessage('Subject');
+				// vscode.window.showInformationMessage('Subject');
 
 				let nodeList: Array<string> = [];
 
@@ -151,7 +151,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				return Promise.resolve( data );
 
 			} else if ( "File" === element.type ) {
-				vscode.window.showInformationMessage('File');
+				// vscode.window.showInformationMessage('File');
 
 				let nodeList: Array<string> = [];
 
@@ -178,7 +178,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				return Promise.resolve( data );
 
 			} else if ("Tag" === element.type) {
-				vscode.window.showInformationMessage('Tab');
+				// vscode.window.showInformationMessage('Tab');
 
 				let nodeList: Array<string> = [];
 
@@ -212,7 +212,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				return Promise.resolve( data );
 
 			} else if ("SubjectSub" === element.type) {
-				vscode.window.showInformationMessage('Subject Children : ' + element.label );
+				// vscode.window.showInformationMessage('Subject Children : ' + element.label );
 
 				let nodeList: Array<string> = [];
 				let nodeIDList: Array<string> = [];
@@ -248,7 +248,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				return Promise.resolve( data );
 
 			} else if ("FileSub" === element.type) {
-				vscode.window.showInformationMessage('File Children : ' + element.label );
+				// vscode.window.showInformationMessage('File Children : ' + element.label );
 
 				let nodeList: Array<string> = [];
 				let nodeIDList: Array<string> = [];
@@ -284,7 +284,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				return Promise.resolve( data );				
 
 			} else if ("TagSub" === element.type) {
-				vscode.window.showInformationMessage('Tag Children : ' + element.label );
+				// vscode.window.showInformationMessage('Tag Children : ' + element.label );
 
 				let nodeList: Array<string> = [];
 				let nodeIDList: Array<string> = [];
@@ -344,7 +344,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	// Treeviewが選択された
 	// 選択のelementからIDを取得してWebviewに反映
 	getTreeviewSelect(element?: string): void {
-		vscode.window.showInformationMessage('getTreeviewSelect');
+		// vscode.window.showInformationMessage('getTreeviewSelect');
 
 		for (let index = 0; index < this.userDataList.length; index++) {
 			const id = this.userDataList[index].id;
