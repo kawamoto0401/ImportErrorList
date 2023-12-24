@@ -248,7 +248,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					const id = nodeIDList[index];
 					const tooltip = nodeIDTooltip[index];
 
-					data.push(new Dependency(element, "", id, vscode.TreeItemCollapsibleState.None, tooltip, {
+					data.push(new Dependency(element, "", "", vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
@@ -284,7 +284,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					const id = nodeIDList[index];
 					const tooltip = nodeIDTooltip[index];
 
-					data.push(new Dependency(element, "", id, vscode.TreeItemCollapsibleState.None, tooltip, {
+					data.push(new Dependency(element, "", "", vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
@@ -322,7 +322,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					const id = nodeIDList[index];
 					const tooltip = nodeIDTooltip[index];
 
-					data.push(new Dependency(element, "", id, vscode.TreeItemCollapsibleState.None, tooltip, {
+					data.push(new Dependency(element, "", "", vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
@@ -390,6 +390,8 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 						// 行と列からスクリーンを移動させる
 						let range = new vscode.Range(pos, pos);
 						editor.revealRange(range);
+
+						gutterIconMng.setGutterIconMng( editor, filename, [row] );
 					});
 				});
 

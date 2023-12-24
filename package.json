@@ -97,13 +97,7 @@
 					"when": "view == nodeDependencies",
 					"group": "navigation"
 				}
-			],
-			"view/item/context": [
-				{
-					"command": "nodeDependencies.bookmark",
-					"when": "view == nodeDependencies && viewItem == dependency"
-				}
-			]			
+			]	
 		}
 				
 	},
