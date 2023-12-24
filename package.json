@@ -16,11 +16,6 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "importerrorlist.helloWorld",
-				"title": "Hello World"
-			},
-
-			{
 				"command": "nodeDependencies.refreshEntry",
 				"title": "Refresh(リフレッシュ)",
 				"icon": {
@@ -45,16 +40,20 @@
 					"light": "resources/light/search.svg",
 					"dark": "resources/dark/search.svg"
 				}
-			}	  
+			},
+			{
+				"command": "nodeDependencies.bookmark",
+				"title": "bookmark"
+			}	 	  
 		],
 
 		"views": {
-			"package-explorer": [
+			"ImportErrorList-explorer": [
 				{
 					"id": "nodeDependencies",
 					"name": "List(リスト)",
 					"icon": "media/dep.svg",
-					"contextualTitle": "Package Explorer"
+					"contextualTitle": "ImportErrorList Explorer"
 				},
 				{
 					"type": "webview",
@@ -74,8 +73,8 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "package-explorer",
-					"title": "Package Explorer",
+					"id": "ImportErrorList-explorer",
+					"title": "ImportErrorList Explorer",
 					"icon": "media/dep.svg"
 				}
 			]
@@ -98,7 +97,13 @@
 					"when": "view == nodeDependencies",
 					"group": "navigation"
 				}
-			]
+			],
+			"view/item/context": [
+				{
+					"command": "nodeDependencies.bookmark",
+					"when": "view == nodeDependencies && viewItem == dependency"
+				}
+			]			
 		}
 				
 	},

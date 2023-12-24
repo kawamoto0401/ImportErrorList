@@ -5,7 +5,6 @@ import * as fs from 'fs';
 
 // import { TestView } from './testView';
 import { DepNodeProvider, Dependency } from './nodeDependencies';
-import { DepCommentProvider, Dependency2 } from './commentDependencies';
 import { WebViewProvider } from './WebViewProvider';
 
 // this method is called when your extension is activated
@@ -37,20 +36,18 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.registerWebviewViewProvider( "example.webview", webViewProvider )
 		);
 
-	//
-	// const commnetDependenciesProvider = new DepCommentProvider();
-	// vscode.window.registerTreeDataProvider('commentDependencies', commnetDependenciesProvider);
-
 	const nodeDependenciesProvider = new DepNodeProvider(webViewProvider);
 	vscode.window.registerTreeDataProvider('nodeDependencies', nodeDependenciesProvider);
 
 	// ツリーが選択されたときを登録
 	vscode.commands.registerCommand('extension.getTreeviewSelect', element => nodeDependenciesProvider.getTreeviewSelect( element ));
 
-	// ツリーがリフレッシュを登録
+	// ツリーがタイトル釦を登録
 	vscode.commands.registerCommand('nodeDependencies.refreshEntry', () => nodeDependenciesProvider.refresh());
 	vscode.commands.registerCommand('nodeDependencies.initTreeviewEntry', () => nodeDependenciesProvider.initTreeview());
 	vscode.commands.registerCommand('nodeDependencies.searchTreeviewEntry', () => nodeDependenciesProvider.searchTreeview());
+
+	vscode.commands.registerCommand('nodeDependencies.bookmark', (node: Dependency) => nodeDependenciesProvider.bookmark(node));
 
 	// 初期のウェルカムウィンドウの釦
 	vscode.commands.registerCommand('openUserFile', async () => {
