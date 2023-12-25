@@ -469,7 +469,12 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			canSelectFiles: true, 
 			canSelectFolders: false, 
 			canSelectMany: false, 
-			title: 'Select a left file for compare' });
+			title: 'Select JSON file to open',
+			filters: {
+				// eslint-disable-next-line @typescript-eslint/naming-convention
+				"Json files": ['json'],
+				// eslint-disable-next-line @typescript-eslint/naming-convention
+				'All files': ['*'] }});
 	
 		if( !userfile ) {
 			return;
