@@ -14,24 +14,24 @@ VSCodeが未対応のツール(例えば静的確認やテストツール)の結
     7:  filename : "D:\\temp\\ImportErrorList\\src\\extension.ts",
     8:	subject : "test Subject",
     9:	description : "test Description",
-	10:	row : 1,
-	11:	column : 1,
-	12:	comment : "test Comment",
-	13:	level : 1,
-	14:	tooltip : "test tooltip",
-	15:	tags : "Edit Tool"
-	16:},
-	17:{
-	18:	filename : "D:\\temp\\ImportErrorList\\src\\extension.ts",
-	19:	subject : "test Subject",
-	20:	description : "test Description",
-	21:	row : 2,
-	22:	column : 2,
-	23:	comment : "test Comment\r\ntest Comment",
-	24:	level : 1,
-	25:	tooltip : "test tooltip2",
-	26:	tags : "Edit"
-	27:}]
+    10:	row : 1,
+    11:	column : 1,
+    12:	comment : "test Comment",
+    13:	level : 1,
+    14:	tooltip : "test tooltip",
+    15:	tags : "Edit Tool"
+    16:},
+    17:{
+    18:	filename : "D:\\temp\\ImportErrorList\\src\\extension.ts",
+    19:	subject : "test Subject",
+    20:	description : "test Description",
+    21:	row : 2,
+    22:	column : 2,
+    23:	comment : "test Comment\r\ntest Comment",
+    24:	level : 1,
+    25:	tooltip : "test tooltip2",
+    26:	tags : "Edit"
+    27:}]
 
 1-4 Aplのチェックコード
 7：filename(ファイルパス)
