@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// context.subscriptions.push(disposable);
 
 	// WebView を登録
-	const webViewProvider = new WebViewProvider(context.extensionUri)
+	const webViewProvider = new WebViewProvider(context.extensionUri);
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider( "example.webview", webViewProvider )
 		);
