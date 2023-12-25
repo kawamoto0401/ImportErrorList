@@ -1,8 +1,9 @@
 {
+	"author": "Kawamoto",
 	"name": "importerrorlist",
 	"displayName": "ImportErrorList",
 	"description": "ImportErrorList vscode",
-	"version": "0.8.7",
+	"version": "0.9.0",
 	"engines": {
 		"vscode": "^1.84.0"
 	},
@@ -97,7 +98,13 @@
 					"when": "view == nodeDependencies",
 					"group": "navigation"
 				}
-			]	
+			],
+			"view/item/context": [
+				{
+					"command": "nodeDependencies.bookmark",
+					"when": "view == nodeDependencies && viewItem == dependency"
+				}
+			]
 		}
 				
 	},

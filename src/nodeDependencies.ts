@@ -5,19 +5,20 @@ import * as path from 'path';
 import { WebViewProvider } from './WebViewProvider';
 import { GutterIconMng } from './GutterIconMng';
 
+// ErrorDataのマスタ情報
 class UserData {
 	constructor(
 		/// 
-		public filename: string,
-		public subject : string,
-		public description : string,
-		public row : number, 
-		public column: number, 
-		public level : number,
-		public comment : string,
-		public tooltip: string,
-		public tags : Array<string>,
-		public id : string
+		public readonly filename: string,
+		public readonly subject : string,
+		public readonly description : string,
+		public readonly row : number, 
+		public readonly column: number, 
+		public readonly level : number,
+		public readonly comment : string,
+		public readonly tooltip: string,
+		public readonly tags : Array<string>,
+		public readonly id : number
 		) {
 	}
 
@@ -40,6 +41,44 @@ class UserData {
 	}
 }
 
+// TreeItemのモデル情報
+class UserTreeItemData {
+
+	// 検索したときに対象外なら表示する/しないを管理
+	public _isVisual : boolean = true;
+
+	constructor(
+		/// 
+		public readonly name: string,
+		public readonly level : number,
+		public readonly tooltip: string,
+		public readonly treeid : number,
+		public readonly userid : number,
+		public readonly type: typeof treeItemType[keyof typeof treeItemType],
+		) {
+	}
+
+	get isVisual(): boolean {
+		return this._isVisual;
+	}
+	
+	set isVisual(b: boolean) {
+		this._isVisual = b;
+	}
+}
+
+
+const treeItemType = {
+	subject: 0,
+	file: 1,
+	tag: 2,
+	subjectSub: 3,
+	fileSub: 4,
+	tagSub: 5,
+	none: 6
+} as const;
+
+
 export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 	private _onDidChangeTreeData: vscode.EventEmitter<Dependency | undefined | void> = new vscode.EventEmitter<Dependency | undefined | void>();
@@ -51,13 +90,24 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	// ErrorDataの通し番号
 	id : number;
 
-	// アイコン管理クラス
+	// Treeのの通し番号
+	treeId : number;
+
+	// TreeとUserDataをつなぎ合わせる
+	treeItemMap : Map< number, number >;
+
+	// ガーターアイコンを管理する
 	gutterIconMng : GutterIconMng;
 
 	constructor(private webViewProvider: WebViewProvider ) {
 		this.userDataList = [];
+
+		// 数字はデバッグのし易さのため意味なし
 		this.id = 1000;
+		this.treeId = 1000000;
+
 		this.gutterIconMng  = new GutterIconMng;
+		this.treeItemMap = new Map< number, number>;
 	}
 
 	// 
@@ -70,6 +120,8 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	initTreeview(): void {
 		// vscode.window.showInformationMessage('initTreeview:');
 		
+		this.treeItemMap.clear();
+
 		this.gutterIconMng.deleteGutterIconMngAll();
 
 		this.userDataList.length = 0;
@@ -132,8 +184,8 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	getChildren(element?: Dependency): Thenable<Dependency[]> {
 		if (element) {
 			// 子ツリーの表示
-			if( "Subject" === element.type ) {
-				// vscode.window.showInformationMessage('Subject');
+			if( treeItemType.subject === element.type ) {
+				// vscode.window.showInformationMessage('subject');
 
 				let nodeList: Array<string> = [];
 
@@ -154,13 +206,13 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
 
-					data.push(new Dependency(element, "SubjectSub", "", vscode.TreeItemCollapsibleState.Collapsed));
+					data.push(new Dependency(element, treeItemType.subjectSub, "", vscode.TreeItemCollapsibleState.Collapsed));
 				}
 
 				return Promise.resolve( data );
 
-			} else if ( "File" === element.type ) {
-				// vscode.window.showInformationMessage('File');
+			} else if ( treeItemType.file === element.type ) {
+				// vscode.window.showInformationMessage('file');
 
 				let nodeList: Array<string> = [];
 
@@ -181,12 +233,12 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
 
-					data.push(new Dependency(element, "FileSub", "", vscode.TreeItemCollapsibleState.Collapsed));
+					data.push(new Dependency(element, treeItemType.fileSub, "", vscode.TreeItemCollapsibleState.Collapsed));
 				}
 
 				return Promise.resolve( data );
 
-			} else if ("Tag" === element.type) {
+			} else if ( treeItemType.tag === element.type ) {
 				// vscode.window.showInformationMessage('Tab');
 
 				let nodeList: Array<string> = [];
@@ -215,16 +267,16 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
 
-					data.push(new Dependency(element, "TagSub", "", vscode.TreeItemCollapsibleState.Collapsed));
+					data.push(new Dependency(element, treeItemType.tagSub, "", vscode.TreeItemCollapsibleState.Collapsed));
 				}
 
 				return Promise.resolve( data );
 
-			} else if ("SubjectSub" === element.type) {
-				// vscode.window.showInformationMessage('Subject Children : ' + element.label );
+			} else if ( treeItemType.subjectSub === element.type ) {
+				// vscode.window.showInformationMessage('subject Children : ' + element.label );
 
 				let nodeList: Array<string> = [];
-				let nodeIDList: Array<string> = [];
+				let nodeIDList: Array<number> = [];
 				let nodeIDTooltip: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
@@ -235,8 +287,8 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					}
 
 					nodeList.push( data.filename );
-					nodeIDList.push( String(data.id) );
-					nodeIDTooltip.push( String(data.tooltip) );
+					nodeIDList.push( data.id );
+					nodeIDTooltip.push( data.tooltip );
 				}
 
 				nodeList.sort();
@@ -245,22 +297,25 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
-					const id = nodeIDList[index];
+					const id = String(nodeIDList[index]);
 					const tooltip = nodeIDTooltip[index];
 
-					data.push(new Dependency(element, "", "", vscode.TreeItemCollapsibleState.None, tooltip, {
+					data.push(new Dependency(element, treeItemType.none, String(this.treeId), vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
+
+					this.treeItemMap.set( this.treeId, nodeIDList[index] );
+					this.treeId++;
 				}
 
 				return Promise.resolve( data );
 
-			} else if ("FileSub" === element.type) {
-				// vscode.window.showInformationMessage('File Children : ' + element.label );
+			} else if ( treeItemType.fileSub === element.type ) {
+				// vscode.window.showInformationMessage('file Children : ' + element.label );
 
 				let nodeList: Array<string> = [];
-				let nodeIDList: Array<string> = [];
+				let nodeIDList: Array<number> = [];
 				let nodeIDTooltip: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
@@ -271,7 +326,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					}
 
 					nodeList.push( data.subject );
-					nodeIDList.push( String(data.id) );
+					nodeIDList.push( data.id );
 					nodeIDTooltip.push( String(data.tooltip) );
 				}
 
@@ -281,22 +336,25 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
-					const id = nodeIDList[index];
+					const id = String(nodeIDList[index]);
 					const tooltip = nodeIDTooltip[index];
 
-					data.push(new Dependency(element, "", "", vscode.TreeItemCollapsibleState.None, tooltip, {
+					data.push(new Dependency(element, treeItemType.none, String(this.treeId), vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
+
+					this.treeItemMap.set( this.treeId, nodeIDList[index] );
+					this.treeId++;
 				}
 
 				return Promise.resolve( data );				
 
-			} else if ("TagSub" === element.type) {
-				// vscode.window.showInformationMessage('Tag Children : ' + element.label );
+			} else if ( treeItemType.tagSub === element.type ) {
+				// vscode.window.showInformationMessage('tag Children : ' + element.label );
 
 				let nodeList: Array<string> = [];
-				let nodeIDList: Array<string> = [];
+				let nodeIDList: Array<number> = [];
 				let nodeIDTooltip: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
@@ -308,7 +366,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 						}
 
 						nodeList.push( data.subject + "：" + data.filename );
-						nodeIDList.push( String(data.id) );
+						nodeIDList.push( data.id );
 						nodeIDTooltip.push( String(data.tooltip) );
 					}
 				}
@@ -319,13 +377,16 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 				for (let index = 0; index < nodeList.length; index++) {
 					const element = nodeList[index];
-					const id = nodeIDList[index];
+					const id = String(nodeIDList[index]);
 					const tooltip = nodeIDTooltip[index];
 
-					data.push(new Dependency(element, "", "", vscode.TreeItemCollapsibleState.None, tooltip, {
+					data.push(new Dependency(element, treeItemType.none, String(this.treeId), vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
+
+					this.treeItemMap.set( this.treeId, nodeIDList[index] );
+					this.treeId++;
 				}
 
 				return Promise.resolve( data );				
@@ -339,9 +400,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			if ( 0 !== this.userDataList.length) {
 				// ファイル読み込み時
 				return Promise.resolve(
-					[new Dependency("Subject", "Subject", "", vscode.TreeItemCollapsibleState.Collapsed), 
-					new Dependency("File", "File", "", vscode.TreeItemCollapsibleState.Collapsed), 
-					new Dependency("Tag", "Tag", "", vscode.TreeItemCollapsibleState.Collapsed)
+					[new Dependency("Subject", treeItemType.subject, "", vscode.TreeItemCollapsibleState.Collapsed), 
+					new Dependency("File", treeItemType.file, "", vscode.TreeItemCollapsibleState.Collapsed), 
+					new Dependency("Tag", treeItemType.tag, "", vscode.TreeItemCollapsibleState.Collapsed)
 				]);
 			} else {
 				// 起動時
@@ -357,7 +418,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 		for (let index = 0; index < this.userDataList.length; index++) {
 			const id = this.userDataList[index].id;
-			if( element === id ) {
+			if( element === String(id) ) {
 
 				// Webviewに反映させる
 				let description = '-';
@@ -391,7 +452,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 						let range = new vscode.Range(pos, pos);
 						editor.revealRange(range);
 
-						gutterIconMng.setGutterIconMng( editor, filename, [row] );
+						// gutterIconMng.setGutterIconMng( editor, filename, [row] );
 					});
 				});
 
@@ -458,7 +519,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 						const tag : string  = data[i].tags;
 						const tagllist : Array<string> = tag.split(/(\s+)/).filter( e => e.trim().length > 0);
 	
-						this.userDataList.push( new UserData(data[i].filename, subject, description, data[i].row, data[i].column, data[i].level, data[i].comment, tooltip, tagllist, String(this.id)));
+						this.userDataList.push( new UserData(data[i].filename, subject, description, data[i].row, data[i].column, data[i].level, data[i].comment, tooltip, tagllist, this.id));
 
 						this.id++;
 					}
@@ -472,50 +533,45 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	}
 	
 	public bookmark( element?: Dependency ){
-		if (element) {
-			for (let index = 0; index < this.userDataList.length; index++) {
-				const id = this.userDataList[index].id;
-				if( element.id === id ) {
-	
-					// Webviewに反映させる
-					let description = '-';
-					let comment = '-';
-	
-					if( undefined !== this.userDataList[index].description ) {
-						description = this.userDataList[index].description;
-					}
-					if( undefined !== this.userDataList[index].comment ) {
-						comment = this.userDataList[index].comment;
-					}
-	
-					this.webViewProvider.chgComment(description, comment);
-	
-	
-					const filename = this.userDataList[index].filename;
-					const row = this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0 ;
-					const column = this.userDataList[index].column > 0 ? this.userDataList[index].column - 1 : 0 ;
-	
-					let gutterIconMng = this.gutterIconMng;
-	
-					// ファイルを開く
-					vscode.workspace.openTextDocument(filename).then(function (doc) {
-						vscode.window.showTextDocument(doc).then( (editor) => {
-	
-							// 行と列からカーソルを移動させる
-							let pos = new vscode.Position( row, column );
-							editor.selection = new vscode.Selection( pos, pos );
-	
-							// 行と列からスクリーンを移動させる
-							let range = new vscode.Range(pos, pos);
-							editor.revealRange(range);
 
-							gutterIconMng.setGutterIconMng( editor, filename, [row] );
+		if (element) {
+
+			const key = Number(element.id);
+
+			if( this.treeItemMap.has(key)) {
+				const userId = this.treeItemMap.get(key);
+
+				for (let index = 0; index < this.userDataList.length; index++) {
+					const id = this.userDataList[index].id;
+					if( userId === id ) {
+		
+						const filename = this.userDataList[index].filename;
+						const row = this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0 ;
+						const column = this.userDataList[index].column > 0 ? this.userDataList[index].column - 1 : 0 ;
+		
+						// 非同期はthiisが使えないため参照する
+						let gutterIconMng = this.gutterIconMng;
+		
+						// ファイルを開く
+						vscode.workspace.openTextDocument(filename).then(function (doc) {
+							vscode.window.showTextDocument(doc).then( (editor) => {
+		
+								// 行と列からカーソルは移動しない
+								let pos = new vscode.Position( row, column );
+		
+								// 行と列からスクリーンを移動させる
+								let range = new vscode.Range(pos, pos);
+								editor.revealRange(range);
+
+								// ガーターアイコンを追加
+								gutterIconMng.setGutterIconMng( editor, filename, [row] );
+							});
 						});
-					});
-	
-					return;
-				}
-			 }
+		
+						return;
+					}
+				}				
+			}
 		}
 	}
 
@@ -535,7 +591,7 @@ export class Dependency extends vscode.TreeItem {
 
 	constructor(
 		public readonly label: string,
-		public readonly type: string,
+		public readonly type: typeof treeItemType[keyof typeof treeItemType],
 		public readonly id: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 		public readonly tooltip?: string,
@@ -546,7 +602,7 @@ export class Dependency extends vscode.TreeItem {
 		this.tooltip = tooltip;
 		// this.description = this.version;
 
-		if( "" === type ) {
+		if( treeItemType.none === type ) {
 			// TODO:レベルによってアイコンを変更する
 			this.iconPath = {
 				light: path.join(__filename, '..', '..', 'resources', 'light', 'file_r.svg'),
@@ -561,7 +617,7 @@ export class Dependency extends vscode.TreeItem {
 				dark: path.join(__filename, '..', '..', 'resources', 'dark', 'folder.svg')
 			};
 
-			// if( "SubjectSub" === type || "FileSub" === type || "TagSub" === type) {
+			// if( "subjectSub" === type || "FileSub" === type || "TagSub" === type) {
 			// 	this.contextValue = 'dependency';
 			// }
  		}	

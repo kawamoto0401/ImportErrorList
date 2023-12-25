@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import { DecorationRangeBehavior, OverviewRulerLane, Uri, ExtensionContext } from "vscode";
 import { TextEditorDecorationType } from "vscode";
 
+// ガーターアイコンを管理する
 export class GutterIconMng {
 
     public readonly placeholderDecorationUri = Uri.file(
@@ -26,6 +27,7 @@ export class GutterIconMng {
     private gutterIconMap: Map<string, vscode.TextEditorDecorationType>;
 
     // フォルダパスの設定とMapを設定
+    // TODO:引数にした方が拡張性があるが放置
     constructor() {
         this.svgDir = Uri.file( path.join(__dirname, "..", "resources", "dark"));
         this.gutterIconMap = new Map();
@@ -86,7 +88,7 @@ export class GutterIconMng {
         }
     }
 
-    // 引数にファイルパスと行数からアイコンがあるかをチェック
+    // 引数にファイルパスと行数からガーターアイコンがあるかをチェック
     // ハッシュから探す
     isGutterIconMng( filename : string, row : number) {
 
@@ -99,6 +101,7 @@ export class GutterIconMng {
         return isData;
     }
 
+    // 持っているアイコンを全て破棄(MapはGC対象外)
     deleteGutterIconMngAll() {
 
         for (const [key, decorationType] of this.gutterIconMap) {

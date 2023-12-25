@@ -66,7 +66,7 @@
             "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
             "subject" : "XSS test Subject",
             "description" : "XSS test <br> Description <br>",
-            "row" : 5,
+            "row" : 52,
             "column" : 1,
             "comment" : "XSS test <br> comment <br>",
             "level" : 1,
