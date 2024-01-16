@@ -45,7 +45,19 @@
 			{
 				"command": "nodeDependencies.bookmark",
 				"title": "bookmark"
-			}	 	  
+			},
+			{
+				"command": "nodeDependencies.bookmarkAll",
+				"title": "bookmark(All)"
+			},
+			{
+				"command": "nodeDependencies.bookmarkFrom",
+				"title": "bookmark(From here onwards)"
+			}
+
+			
+
+
 		],
 
 		"views": {
@@ -103,10 +115,17 @@
 				{
 					"command": "nodeDependencies.bookmark",
 					"when": "view == nodeDependencies && viewItem == dependency"
+				},
+				{
+					"command": "nodeDependencies.bookmarkFrom",
+					"when": "view == nodeDependencies && viewItem == dependency"
+				},
+				{
+					"command": "nodeDependencies.bookmarkAll",
+					"when": "view == nodeDependencies && viewItem == dependency"
 				}
 			]
-		}
-				
+		}				
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",

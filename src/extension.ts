@@ -6,6 +6,14 @@ import * as fs from 'fs';
 // import { TestView } from './testView';
 import { DepNodeProvider, Dependency } from './nodeDependencies';
 import { WebViewProvider } from './WebViewProvider';
+import {
+    ExtensionContext,
+    FileDeleteEvent, FileRenameEvent,
+    OverviewRulerLane,
+    Range, Selection,
+    StatusBarItem,
+    TextDocument, TextDocumentChangeEvent, TextEditor, TextEditorDecorationType
+} from 'vscode';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -47,13 +55,20 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('nodeDependencies.initTreeviewEntry', () => nodeDependenciesProvider.initTreeview());
 	vscode.commands.registerCommand('nodeDependencies.searchTreeviewEntry', () => nodeDependenciesProvider.searchTreeview());
 
-	vscode.commands.registerCommand('nodeDependencies.bookmark', (node: Dependency) => nodeDependenciesProvider.bookmark(node));
+	vscode.commands.registerCommand('nodeDependencies.bookmark', (node: Dependency) => nodeDependenciesProvider.setbookmark(node));
+	vscode.commands.registerCommand('nodeDependencies.bookmarkFrom', (node: Dependency) => nodeDependenciesProvider.setbookmarkFrom(node));
+	vscode.commands.registerCommand('nodeDependencies.bookmarkAll', (node: Dependency) => nodeDependenciesProvider.setbookmarkAll(node));
 
 	// 初期のウェルカムウィンドウの釦
 	vscode.commands.registerCommand('openUserFile', async () => {
 		nodeDependenciesProvider.getjson();
 	});
 
+	// アクティブなエディターが変更されたときに発生するイベント 
+	vscode.window.onDidChangeActiveTextEditor(textEditor => { nodeDependenciesProvider.updateEditorDecorations(textEditor); });
+
+	// テキストドキュメントが変更されたときに発行されるイベント
+	vscode.workspace.onDidChangeTextDocument(textDocumentChangeEvent => { nodeDependenciesProvider.onEditorDocumentChanged(textDocumentChangeEvent); });
 
 
 }

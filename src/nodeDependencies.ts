@@ -438,8 +438,6 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				const row = this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0 ;
 				const column = this.userDataList[index].column > 0 ? this.userDataList[index].column - 1 : 0 ;
 
-				let gutterIconMng = this.gutterIconMng;
-
 				// ファイルを開く
 				vscode.workspace.openTextDocument(filename).then(function (doc) {
 					vscode.window.showTextDocument(doc).then( (editor) => {
@@ -451,8 +449,6 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 						// 行と列からスクリーンを移動させる
 						let range = new vscode.Range(pos, pos);
 						editor.revealRange(range);
-
-						// gutterIconMng.setGutterIconMng( editor, filename, [row] );
 					});
 				});
 
@@ -537,7 +533,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 		});
 	}
 	
-	public bookmark( element?: Dependency ){
+	public setbookmark( element?: Dependency ){
 
 		if (element) {
 
@@ -579,7 +575,126 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			}
 		}
 	}
+	
+	public setbookmarkFrom( element?: Dependency ){
 
+		if (element) {
+
+			const key = Number(element.id);
+
+			if( this.treeItemMap.has(key)) {
+				const userId = this.treeItemMap.get(key);
+
+				let filename : string = "";
+				let row = 0;
+				let column = 0;
+
+				for (let index = 0; index < this.userDataList.length; index++) {
+					const id = this.userDataList[index].id;
+					if( userId === id ) {
+		
+						filename = this.userDataList[index].filename;
+						row = this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0;
+						column = this.userDataList[index].column > 0 ? this.userDataList[index].column - 1 : 0;
+
+						break;
+					}
+				}
+
+				if( 0 === filename.length ) {
+					return;
+				}
+
+				let rows : number[] = [];
+
+				for (let index = 0; index < this.userDataList.length; index++) {
+					if( filename === this.userDataList[index].filename ) {
+						if( row <= this.userDataList[index].row ) {
+							rows.push(this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0);
+						}
+					}
+				}
+
+				// 非同期はthiisが使えないため参照する
+				let gutterIconMng = this.gutterIconMng;
+
+				// ファイルを開く
+				vscode.workspace.openTextDocument(filename).then(function (doc) {
+					vscode.window.showTextDocument(doc).then( (editor) => {
+
+						// 行と列からカーソルは移動しない
+						let pos = new vscode.Position( row, column );
+
+						// 行と列からスクリーンを移動させる
+						let range = new vscode.Range(pos, pos);
+						editor.revealRange(range);
+
+						// ガーターアイコンを追加
+						gutterIconMng.setGutterIconMng( editor, filename, rows );
+					});
+				});
+			}
+		}
+	}
+	
+	public setbookmarkAll( element?: Dependency ){
+
+		if (element) {
+
+			const key = Number(element.id);
+
+			if( this.treeItemMap.has(key)) {
+				const userId = this.treeItemMap.get(key);
+
+				let filename : string = "";
+				let row = 0;
+				let column = 0;
+
+				for (let index = 0; index < this.userDataList.length; index++) {
+					const id = this.userDataList[index].id;
+					if( userId === id ) {
+		
+						filename = this.userDataList[index].filename;
+						row = this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0;
+						column = this.userDataList[index].column > 0 ? this.userDataList[index].column - 1 : 0;
+
+						break;
+					}
+				}
+
+				if( 0 === filename.length ) {
+					return;
+				}
+
+				let rows : number[] = [];
+
+				for (let index = 0; index < this.userDataList.length; index++) {
+					if( filename === this.userDataList[index].filename ) {
+						rows.push(this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0);
+					}
+				}
+
+				// 非同期はthiisが使えないため参照する
+				let gutterIconMng = this.gutterIconMng;
+
+				// ファイルを開く
+				vscode.workspace.openTextDocument(filename).then(function (doc) {
+					vscode.window.showTextDocument(doc).then( (editor) => {
+
+						// 行と列からカーソルは移動しない
+						let pos = new vscode.Position( row, column );
+
+						// 行と列からスクリーンを移動させる
+						let range = new vscode.Range(pos, pos);
+						editor.revealRange(range);
+
+						// ガーターアイコンを追加
+						gutterIconMng.setGutterIconMng( editor, filename, rows );
+					});
+				});
+			}
+		}
+	}
 
 	private pathExists(p: string): boolean {
 		try {
@@ -590,6 +705,194 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 		return true;
 	}
+
+	// アクティブなエディターが変更されたときに発生するイベント
+    public updateEditorDecorations(textEditor: vscode.TextEditor | undefined) {
+        if (typeof textEditor === "undefined") {
+            return;
+        }
+
+        let fsPath = textEditor.document.uri.fsPath;
+
+		let editorDecorations = this.gutterIconMng.getDecorationsList(fsPath);
+
+        for (let [decoration, ranges] of editorDecorations) {
+            textEditor.setDecorations(decoration, ranges);
+        }
+    }
+
+	// テキストドキュメントが変更されたときに発行されるイベント
+    public onEditorDocumentChanged(event: vscode.TextDocumentChangeEvent) {
+        let fsPath = event.document.uri.fsPath;
+        // let fileBookmarkList = this.getTempDocumentBookmarkList(fsPath);
+
+        // if (fileBookmarkList.length === 0) {
+        //     return;
+        // }
+
+        // let bookmarksChanged = false;
+
+        // for (let change of event.contentChanges) {
+        //     let newLineCount = this.getNlCount(change.text);
+
+        //     let oldFirstLine = change.range.start.line;
+        //     let oldLastLine = change.range.end.line;
+        //     let oldLineCount = oldLastLine - oldFirstLine;
+
+        //     if (newLineCount === oldLineCount) {
+        //         let updateCount = this.updateBookmarkLineTextInRange(
+        //             event.document,
+        //             fileBookmarkList,
+        //             oldFirstLine,
+        //             oldLastLine
+        //         );
+        //         if (updateCount > 0) {
+        //             this.treeViewRefreshCallback();
+        //         }
+        //         continue;
+        //     }
+
+
+        //     if (newLineCount > oldLineCount) {
+        //         let shiftDownBy = newLineCount - oldLineCount;
+        //         let newLastLine = oldFirstLine + newLineCount;
+
+        //         let firstLinePrefix = event.document.getText(
+        //             new Range(oldFirstLine, 0, oldFirstLine, change.range.start.character)
+        //         );
+        //         let isFirstLinePrefixEmpty = firstLinePrefix.trim() === "";
+
+        //         let shiftDownFromLine = (isFirstLinePrefixEmpty ? oldFirstLine : oldFirstLine + 1);
+
+        //         for (let bookmark of fileBookmarkList) {
+        //             if (bookmark.lineNumber >= shiftDownFromLine) {
+        //                 bookmark.lineNumber += shiftDownBy;
+        //                 bookmarksChanged = true;
+        //             }
+
+        //             if (bookmark.lineNumber >= oldFirstLine && bookmark.lineNumber <= newLastLine) {
+        //                 this.updateBookmarkLineText(event.document, bookmark);
+        //                 this.treeViewRefreshCallback();
+        //             }
+        //         }
+        //         continue;
+        //     }
+
+
+        //     if (newLineCount < oldLineCount) {
+        //         let shiftUpBy = oldLineCount - newLineCount;
+        //         let newLastLine = oldFirstLine + newLineCount;
+
+        //         let firstLinePrefix = event.document.getText(
+        //             new Range(oldFirstLine, 0, oldFirstLine, change.range.start.character)
+        //         );
+        //         let isFirstLineBookkmarkDeletable = firstLinePrefix.trim() === "";
+
+        //         if (!isFirstLineBookkmarkDeletable) {
+        //             let firstLineBookmark = fileBookmarkList.find(bookmark => bookmark.lineNumber === oldFirstLine);
+        //             if (typeof firstLineBookmark === "undefined") {
+        //                 isFirstLineBookkmarkDeletable = true;
+        //             }
+        //         }
+
+        //         let deleteFromLine = (isFirstLineBookkmarkDeletable ? oldFirstLine : oldFirstLine + 1);
+        //         let shiftFromLine = deleteFromLine + shiftUpBy;
+
+        //         for (let bookmark of fileBookmarkList) {
+        //             if (bookmark.lineNumber < oldFirstLine) {
+        //                 continue;
+        //             }
+
+        //             if (bookmark.lineNumber >= deleteFromLine && bookmark.lineNumber < shiftFromLine) {
+        //                 this.deleteBookmark(bookmark);
+        //                 bookmarksChanged = true;
+        //                 continue;
+        //             }
+
+        //             if (bookmark.lineNumber >= shiftFromLine) {
+        //                 bookmark.lineNumber -= shiftUpBy;
+        //                 bookmarksChanged = true;
+        //             }
+
+        //             if (bookmark.lineNumber >= oldFirstLine && bookmark.lineNumber <= newLastLine) {
+        //                 this.updateBookmarkLineText(event.document, bookmark);
+        //                 this.treeViewRefreshCallback();
+        //             }
+        //         }
+        //         continue;
+        //     }
+        // }
+
+        // if (bookmarksChanged) {
+        //     this.tempDocumentDecorations.delete(fsPath);
+        //     this.saveState();
+        //     this.updateDecorations();
+        //     this.treeViewRefreshCallback();
+        // }
+    }
+
+    // private getTempDocumentBookmarkList(fsPath: string): Array<Bookmark> {
+        // let list = this.tempDocumentBookmarks.get(fsPath);
+
+        // if (typeof list !== "undefined") {
+        //     return list;
+        // }
+
+        // list = this.bookmarks.filter((bookmark) => { return bookmark.fsPath === fsPath; });
+        // this.tempDocumentBookmarks.set(fsPath, list);
+
+        // return list;
+    // }
+
+
+    // private getTempDocumentDecorationsList(fsPath: string): Map<vscode.TextEditorDecorationType, Array<vscode.Range>> {
+        // let editorDecorations = this.tempDocumentDecorations.get(fsPath);
+
+        // if (typeof editorDecorations !== "undefined") {
+        //     return editorDecorations;
+        // }
+
+        // let lineDecorations = new Map<number, TextEditorDecorationType>();
+        // let fileBookmarks = this.bookmarks
+        //     .filter((bookmark) => {
+        //         return bookmark.fsPath === fsPath && bookmark.getDecoration !== null;
+        //     });
+
+        // fileBookmarks.filter(bookmark => bookmark.group === this.activeGroup)
+        //     .forEach(bookmark => {
+        //         let decoration = bookmark.getDecoration();
+        //         if (decoration !== null) {
+        //             lineDecorations.set(bookmark.lineNumber, decoration);
+        //         }
+        //     });
+
+        // fileBookmarks.filter(bookmark => bookmark.group !== this.activeGroup)
+        //     .forEach((bookmark) => {
+        //         let decoration = bookmark.getDecoration();
+        //         if (decoration !== null) {
+        //             if (!lineDecorations.has(bookmark.lineNumber)) {
+        //                 lineDecorations.set(bookmark.lineNumber, decoration);
+        //             } else {
+        //                 this.handleDecorationRemoved(decoration);
+        //             }
+        //         }
+        //     });
+
+        // editorDecorations = new Map<TextEditorDecorationType, Range[]>();
+        // for (let [lineNumber, decoration] of lineDecorations) {
+        //     let ranges = editorDecorations.get(decoration);
+        //     if (typeof ranges === "undefined") {
+        //         ranges = new Array<Range>();
+        //         editorDecorations.set(decoration, ranges);
+        //     }
+
+        //     ranges.push(new Range(lineNumber, 0, lineNumber, 0));
+        // }
+
+        // this.tempDocumentDecorations.set(fsPath, editorDecorations);
+
+        // return editorDecorations;
+    // }
 }
 
 export class Dependency extends vscode.TreeItem {
