@@ -246,7 +246,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const element = this.userDataList[index];
 
-					for (let index2 = 0; index2 < this.userDataList.length; index2++) {
+					for (let index2 = 0; index2 < element.tags.length; index2++) {
 						const str : string = element.tags[index2];
 						if( undefined === str ) {
 							continue;
@@ -325,7 +325,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 						continue;
 					}
 
-					nodeList.push( data.subject );
+					nodeList.push( data.row + ":" +data.subject );
 					nodeIDList.push( data.id );
 					nodeIDTooltip.push( String(data.tooltip) );
 				}
