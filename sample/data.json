@@ -5,6 +5,39 @@
     "data": [
         {
             "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
+            "subject" : "test Subject2",
+            "description" : "test Description",
+            "row" : 1,
+            "column" : 1,
+            "comment" : "test Comment",
+            "level" : 1,
+            "tooltip" : "test tooltip",
+            "tags" : "Edit Tool"
+        },
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
+            "subject" : "test Subject3",
+            "description" : "test Description",
+            "row" : 1,
+            "column" : 1,
+            "comment" : "test Comment",
+            "level" : 1,
+            "tooltip" : "test tooltip",
+            "tags" : "Edit Tool"
+        },
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
+            "subject" : "test Subject2",
+            "description" : "test Description",
+            "row" : 1,
+            "column" : 1,
+            "comment" : "test Comment",
+            "level" : 1,
+            "tooltip" : "test tooltip",
+            "tags" : "Edit Tool"
+        },
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts2",
             "subject" : "test Subject",
             "description" : "test Description",
             "row" : 1,

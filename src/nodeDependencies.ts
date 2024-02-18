@@ -85,20 +85,20 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	readonly onDidChangeTreeData: vscode.Event<Dependency | undefined | void> = this._onDidChangeTreeData.event;
 
 	// ErrorDataの配列
-	userDataList: Array<UserData>;
+	private userDataList: Array<UserData>;
 
 	// ErrorDataの通し番号
-	id : number;
+	private id : number;
 
 	// Treeのの通し番号
-	treeId : number;
+	private treeId : number;
 
 	// TreeとUserDataをつなぎ合わせる
-	treeItemMap : Map< number, number >;
+	private treeItemMap : Map< number, number >;
 
 	// ガーターアイコンを管理する
-	gutterIconMng : GutterIconMng;
-
+	private gutterIconMng : GutterIconMng;
+ 
 	constructor(private webViewProvider: WebViewProvider ) {
 		this.userDataList = [];
 
@@ -189,6 +189,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 				let nodeList: Array<string> = [];
 
+				// 同一の題名を抽出する
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const element = this.userDataList[index];
 
@@ -212,8 +213,6 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				return Promise.resolve( data );
 
 			} else if ( treeItemType.file === element.type ) {
-				// vscode.window.showInformationMessage('file');
-
 				let nodeList: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
@@ -239,8 +238,6 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				return Promise.resolve( data );
 
 			} else if ( treeItemType.tag === element.type ) {
-				// vscode.window.showInformationMessage('Tab');
-
 				let nodeList: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
@@ -275,9 +272,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			} else if ( treeItemType.subjectSub === element.type ) {
 				// vscode.window.showInformationMessage('subject Children : ' + element.label );
 
-				let nodeList: Array<string> = [];
-				let nodeIDList: Array<number> = [];
-				let nodeIDTooltip: Array<string> = [];
+				let nodeList: Array<UserData> = [];
+				// let nodeIDList: Array<number> = [];
+				// let nodeIDTooltip: Array<string> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const data = this.userDataList[index];
@@ -286,37 +283,40 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 						continue;
 					}
 
-					nodeList.push( data.filename );
-					nodeIDList.push( data.id );
-					nodeIDTooltip.push( data.tooltip );
+					// nodeList.push( data.filename );
+					nodeList.push( data );
+					// nodeIDTooltip.push( data.tooltip );
 				}
 
-				nodeList.sort();
-
+				// ファイル名でソートする
+				nodeList.sort((a,b) => {
+					if (a.filename > b.filename ) {
+						return 1;
+					}
+					return -1;
+				});
+				
 				let data : Dependency[] = [];
 
 				for (let index = 0; index < nodeList.length; index++) {
-					const element = nodeList[index];
-					const id = String(nodeIDList[index]);
-					const tooltip = nodeIDTooltip[index];
+					const element = nodeList[index].filename;
+					const id = String(nodeList[index].id);
+					const tooltip = nodeList[index].tooltip;
 
 					data.push(new Dependency(element, treeItemType.none, String(this.treeId), vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
 
-					this.treeItemMap.set( this.treeId, nodeIDList[index] );
+					this.treeItemMap.set( this.treeId, nodeList[index].id );
 					this.treeId++;
 				}
 
 				return Promise.resolve( data );
 
 			} else if ( treeItemType.fileSub === element.type ) {
-				// vscode.window.showInformationMessage('file Children : ' + element.label );
 
-				let nodeList: Array<string> = [];
-				let nodeIDList: Array<number> = [];
-				let nodeIDTooltip: Array<string> = [];
+				let nodeList: Array<UserData> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const data = this.userDataList[index];
@@ -325,37 +325,43 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 						continue;
 					}
 
-					nodeList.push( data.row + ":" +data.subject );
-					nodeIDList.push( data.id );
-					nodeIDTooltip.push( String(data.tooltip) );
+					nodeList.push( data );
 				}
 
-				nodeList.sort();
-
+				// 行数でソートし、同じ時は題名でソートする
+				nodeList.sort((a,b) => {
+					if (a.row > b.row ) {
+						return 1;
+					}
+					else if( a.row === b.row ) {
+						if( a.subject > a.subject ) {
+							return 1;
+						}						
+					}
+					return -1;
+				});
+				
 				let data : Dependency[] = [];
 
 				for (let index = 0; index < nodeList.length; index++) {
-					const element = nodeList[index];
-					const id = String(nodeIDList[index]);
-					const tooltip = nodeIDTooltip[index];
+					const element = nodeList[index].row + ":" + nodeList[index].subject;
+					const id = String(nodeList[index].id);
+					const tooltip = nodeList[index].tooltip;
 
 					data.push(new Dependency(element, treeItemType.none, String(this.treeId), vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
 
-					this.treeItemMap.set( this.treeId, nodeIDList[index] );
+					this.treeItemMap.set( this.treeId, nodeList[index].id );
 					this.treeId++;
 				}
 
 				return Promise.resolve( data );				
 
 			} else if ( treeItemType.tagSub === element.type ) {
-				// vscode.window.showInformationMessage('tag Children : ' + element.label );
 
-				let nodeList: Array<string> = [];
-				let nodeIDList: Array<number> = [];
-				let nodeIDTooltip: Array<string> = [];
+				let nodeList: Array<UserData> = [];
 
 				for (let index = 0; index < this.userDataList.length; index++) {
 					const data = this.userDataList[index];
@@ -365,27 +371,36 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 							continue;
 						}
 
-						nodeList.push( data.subject + "：" + data.filename );
-						nodeIDList.push( data.id );
-						nodeIDTooltip.push( String(data.tooltip) );
+						nodeList.push( data );
 					}
 				}
 
-				nodeList.sort();
-
+				// 題名でソートし、同じ時はファイル名でソートする
+				nodeList.sort((a,b) => {
+					if (a.subject > b.subject ) {
+						return 1;
+					}
+					else if( a.subject === b.subject ) {
+						if( a.filename > a.filename ) {
+							return 1;
+						}						
+					}
+					return -1;
+				});
+				
 				let data : Dependency[] = [];
 
 				for (let index = 0; index < nodeList.length; index++) {
-					const element = nodeList[index];
-					const id = String(nodeIDList[index]);
-					const tooltip = nodeIDTooltip[index];
+					const element = nodeList[index].subject + "：" + nodeList[index].filename;
+					const id = String(nodeList[index].id);
+					const tooltip = nodeList[index].tooltip;
 
 					data.push(new Dependency(element, treeItemType.none, String(this.treeId), vscode.TreeItemCollapsibleState.None, tooltip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [id]}));
 
-					this.treeItemMap.set( this.treeId, nodeIDList[index] );
+					this.treeItemMap.set( this.treeId, nodeList[index].id );
 					this.treeId++;
 				}
 
@@ -724,175 +739,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	// テキストドキュメントが変更されたときに発行されるイベント
     public onEditorDocumentChanged(event: vscode.TextDocumentChangeEvent) {
         let fsPath = event.document.uri.fsPath;
-        // let fileBookmarkList = this.getTempDocumentBookmarkList(fsPath);
-
-        // if (fileBookmarkList.length === 0) {
-        //     return;
-        // }
-
-        // let bookmarksChanged = false;
-
-        // for (let change of event.contentChanges) {
-        //     let newLineCount = this.getNlCount(change.text);
-
-        //     let oldFirstLine = change.range.start.line;
-        //     let oldLastLine = change.range.end.line;
-        //     let oldLineCount = oldLastLine - oldFirstLine;
-
-        //     if (newLineCount === oldLineCount) {
-        //         let updateCount = this.updateBookmarkLineTextInRange(
-        //             event.document,
-        //             fileBookmarkList,
-        //             oldFirstLine,
-        //             oldLastLine
-        //         );
-        //         if (updateCount > 0) {
-        //             this.treeViewRefreshCallback();
-        //         }
-        //         continue;
-        //     }
-
-
-        //     if (newLineCount > oldLineCount) {
-        //         let shiftDownBy = newLineCount - oldLineCount;
-        //         let newLastLine = oldFirstLine + newLineCount;
-
-        //         let firstLinePrefix = event.document.getText(
-        //             new Range(oldFirstLine, 0, oldFirstLine, change.range.start.character)
-        //         );
-        //         let isFirstLinePrefixEmpty = firstLinePrefix.trim() === "";
-
-        //         let shiftDownFromLine = (isFirstLinePrefixEmpty ? oldFirstLine : oldFirstLine + 1);
-
-        //         for (let bookmark of fileBookmarkList) {
-        //             if (bookmark.lineNumber >= shiftDownFromLine) {
-        //                 bookmark.lineNumber += shiftDownBy;
-        //                 bookmarksChanged = true;
-        //             }
-
-        //             if (bookmark.lineNumber >= oldFirstLine && bookmark.lineNumber <= newLastLine) {
-        //                 this.updateBookmarkLineText(event.document, bookmark);
-        //                 this.treeViewRefreshCallback();
-        //             }
-        //         }
-        //         continue;
-        //     }
-
-
-        //     if (newLineCount < oldLineCount) {
-        //         let shiftUpBy = oldLineCount - newLineCount;
-        //         let newLastLine = oldFirstLine + newLineCount;
-
-        //         let firstLinePrefix = event.document.getText(
-        //             new Range(oldFirstLine, 0, oldFirstLine, change.range.start.character)
-        //         );
-        //         let isFirstLineBookkmarkDeletable = firstLinePrefix.trim() === "";
-
-        //         if (!isFirstLineBookkmarkDeletable) {
-        //             let firstLineBookmark = fileBookmarkList.find(bookmark => bookmark.lineNumber === oldFirstLine);
-        //             if (typeof firstLineBookmark === "undefined") {
-        //                 isFirstLineBookkmarkDeletable = true;
-        //             }
-        //         }
-
-        //         let deleteFromLine = (isFirstLineBookkmarkDeletable ? oldFirstLine : oldFirstLine + 1);
-        //         let shiftFromLine = deleteFromLine + shiftUpBy;
-
-        //         for (let bookmark of fileBookmarkList) {
-        //             if (bookmark.lineNumber < oldFirstLine) {
-        //                 continue;
-        //             }
-
-        //             if (bookmark.lineNumber >= deleteFromLine && bookmark.lineNumber < shiftFromLine) {
-        //                 this.deleteBookmark(bookmark);
-        //                 bookmarksChanged = true;
-        //                 continue;
-        //             }
-
-        //             if (bookmark.lineNumber >= shiftFromLine) {
-        //                 bookmark.lineNumber -= shiftUpBy;
-        //                 bookmarksChanged = true;
-        //             }
-
-        //             if (bookmark.lineNumber >= oldFirstLine && bookmark.lineNumber <= newLastLine) {
-        //                 this.updateBookmarkLineText(event.document, bookmark);
-        //                 this.treeViewRefreshCallback();
-        //             }
-        //         }
-        //         continue;
-        //     }
-        // }
-
-        // if (bookmarksChanged) {
-        //     this.tempDocumentDecorations.delete(fsPath);
-        //     this.saveState();
-        //     this.updateDecorations();
-        //     this.treeViewRefreshCallback();
-        // }
     }
-
-    // private getTempDocumentBookmarkList(fsPath: string): Array<Bookmark> {
-        // let list = this.tempDocumentBookmarks.get(fsPath);
-
-        // if (typeof list !== "undefined") {
-        //     return list;
-        // }
-
-        // list = this.bookmarks.filter((bookmark) => { return bookmark.fsPath === fsPath; });
-        // this.tempDocumentBookmarks.set(fsPath, list);
-
-        // return list;
-    // }
-
-
-    // private getTempDocumentDecorationsList(fsPath: string): Map<vscode.TextEditorDecorationType, Array<vscode.Range>> {
-        // let editorDecorations = this.tempDocumentDecorations.get(fsPath);
-
-        // if (typeof editorDecorations !== "undefined") {
-        //     return editorDecorations;
-        // }
-
-        // let lineDecorations = new Map<number, TextEditorDecorationType>();
-        // let fileBookmarks = this.bookmarks
-        //     .filter((bookmark) => {
-        //         return bookmark.fsPath === fsPath && bookmark.getDecoration !== null;
-        //     });
-
-        // fileBookmarks.filter(bookmark => bookmark.group === this.activeGroup)
-        //     .forEach(bookmark => {
-        //         let decoration = bookmark.getDecoration();
-        //         if (decoration !== null) {
-        //             lineDecorations.set(bookmark.lineNumber, decoration);
-        //         }
-        //     });
-
-        // fileBookmarks.filter(bookmark => bookmark.group !== this.activeGroup)
-        //     .forEach((bookmark) => {
-        //         let decoration = bookmark.getDecoration();
-        //         if (decoration !== null) {
-        //             if (!lineDecorations.has(bookmark.lineNumber)) {
-        //                 lineDecorations.set(bookmark.lineNumber, decoration);
-        //             } else {
-        //                 this.handleDecorationRemoved(decoration);
-        //             }
-        //         }
-        //     });
-
-        // editorDecorations = new Map<TextEditorDecorationType, Range[]>();
-        // for (let [lineNumber, decoration] of lineDecorations) {
-        //     let ranges = editorDecorations.get(decoration);
-        //     if (typeof ranges === "undefined") {
-        //         ranges = new Array<Range>();
-        //         editorDecorations.set(decoration, ranges);
-        //     }
-
-        //     ranges.push(new Range(lineNumber, 0, lineNumber, 0));
-        // }
-
-        // this.tempDocumentDecorations.set(fsPath, editorDecorations);
-
-        // return editorDecorations;
-    // }
 }
 
 export class Dependency extends vscode.TreeItem {
@@ -924,10 +771,6 @@ export class Dependency extends vscode.TreeItem {
 				light: path.join(__filename, '..', '..', 'resources', 'light', 'folder.svg'),
 				dark: path.join(__filename, '..', '..', 'resources', 'dark', 'folder.svg')
 			};
-
-			// if( "subjectSub" === type || "FileSub" === type || "TagSub" === type) {
-			// 	this.contextValue = 'dependency';
-			// }
  		}	
 	}
 }
