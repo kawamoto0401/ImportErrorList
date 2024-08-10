@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import Tree from 'ts-tree-structure';
+
 
 export class NodeDependenciesProvider implements vscode.TreeDataProvider<Dependency> {
   constructor(private workspaceRoot: string) {}

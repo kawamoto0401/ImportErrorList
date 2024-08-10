@@ -5,7 +5,7 @@ import * as fs from 'fs';
 
 // import { TestView } from './testView';
 import { DepNodeProvider, Dependency } from './nodeDependencies';
-import { WebViewProvider } from './WebViewProvider';
+
 import {
     ExtensionContext,
     FileDeleteEvent, FileRenameEvent,
@@ -14,6 +14,7 @@ import {
     StatusBarItem,
     TextDocument, TextDocumentChangeEvent, TextEditor, TextEditorDecorationType
 } from 'vscode';
+import { WebViewProvider } from './WebViewProvider';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -26,17 +27,6 @@ export function activate(context: vscode.ExtensionContext) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "importerrorlist" is now active!');
-
-	// // The command has been defined in the package.json file
-	// // Now provide the implementation of the command with registerCommand
-	// // The commandId parameter must match the command field in package.json
-	// let disposable = vscode.commands.registerCommand('importerrorlist.helloWorld', () => {
-	// 	// The code you place here will be executed every time your command is executed
-	// 	// Display a message box to the user
-	// 	vscode.window.showInformationMessage('Hello World from ImportErrorList!');
-	// });
-
-	// context.subscriptions.push(disposable);
 
 	// WebView を登録
 	const webViewProvider = new WebViewProvider(context.extensionUri);
@@ -56,7 +46,6 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('nodeDependencies.searchTreeviewEntry', () => nodeDependenciesProvider.searchTreeview());
 
 	vscode.commands.registerCommand('nodeDependencies.bookmark', (node: Dependency) => nodeDependenciesProvider.setbookmark(node));
-	vscode.commands.registerCommand('nodeDependencies.bookmarkFrom', (node: Dependency) => nodeDependenciesProvider.setbookmarkFrom(node));
 	vscode.commands.registerCommand('nodeDependencies.bookmarkAll', (node: Dependency) => nodeDependenciesProvider.setbookmarkAll(node));
 
 	// 初期のウェルカムウィンドウの釦
@@ -69,7 +58,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// テキストドキュメントが変更されたときに発行されるイベント
 	vscode.workspace.onDidChangeTextDocument(textDocumentChangeEvent => { nodeDependenciesProvider.onEditorDocumentChanged(textDocumentChangeEvent); });
-
 
 }
 

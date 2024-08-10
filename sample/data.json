@@ -27,8 +27,8 @@
         },
         {
             "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
-            "subject" : "test Subject2",
-            "description" : "test Description",
+            "subject" : "test tooltip tags Subject",
+            "description" : "test tooltip tags Description",
             "row" : 1,
             "column" : 1,
             "comment" : "test Comment",
@@ -38,8 +38,8 @@
         },
         {
             "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts2",
-            "subject" : "test Subject",
-            "description" : "test Description",
+            "subject" : "test tooltip tags Subject",
+            "description" : "test tooltip tags Description",
             "row" : 1,
             "column" : 1,
             "comment" : "test Comment",
@@ -95,6 +95,29 @@
             "tags" : ""
         },
 
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
+            "subject" : "level Test Data",
+            "description" : "level Test Data Description",
+            "row" : 5,
+            "column" : 4,
+            "comment" : "",
+            "level" : 2,
+            "tooltip" : "",
+            "tags" : ""
+        },
+
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
+            "subject" : "level Test Data",
+            "description" : "level Test Data Description",
+            "row" : 6,
+            "column" : 4,
+            "comment" : "",
+            "level" : 3,
+            "tooltip" : "",
+            "tags" : ""
+        },        
         {
             "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
             "subject" : "XSS test Subject",

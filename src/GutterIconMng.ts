@@ -35,10 +35,24 @@ export class GutterIconMng {
 
     // 引数にファイルパスと行数を設定
     // ハッシュに登録する
-    setGutterIconMng( editor: vscode.TextEditor, filename : string, rows : number[]) {
+    setGutterIconMng( editor: vscode.TextEditor, filename : string, rows : number[], level: number) {
 
-        // 
-        const svgUri = Uri.joinPath(this.svgDir, "file_r.svg");
+        let svgUri = Uri.joinPath(this.svgDir, "file_r.svg");
+        switch (level) {
+            case 3:
+                svgUri = Uri.joinPath(this.svgDir, "file_b.svg");
+                break;
+
+            case 2:
+                svgUri = Uri.joinPath(this.svgDir, "file_e.svg");
+                break;
+
+            case 1:
+            default:
+                svgUri = Uri.joinPath(this.svgDir, "file_r.svg");
+                break;
+        }
+
         const decorationOptions = {
             gutterIconPath: svgUri,
             rangeBehavior: DecorationRangeBehavior.ClosedClosed
