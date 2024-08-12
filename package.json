@@ -3,7 +3,7 @@
 	"name": "importerrorlist",
 	"displayName": "ImportErrorList",
 	"description": "ImportErrorList vscode",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"engines": {
 		"vscode": "^1.84.0"
 	},

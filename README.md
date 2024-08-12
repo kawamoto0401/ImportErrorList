@@ -1,38 +1,59 @@
 
-独自のエラーリストをVSCodeで読み込ませてソースジャンプ出来るようにします
+# ImportErrorList vscode README
 
-VSCodeが未対応のツール(例えば静的確認やテストツール)の結果を独自のJsonファイルにすることで読み込むことが可能です
+独自にエラーリストをVScodeで読み込めるようにします
+
+Allows VScode to read the error list independently
 
 
-↓JSONファイル
-    1:{ 
-    2:	ImportErrorList: {
-    3:	version: 1.0
-    4:},
-    5:data: [
-    6:{
-    7:  filename : "D:\\temp\\ImportErrorList\\src\\extension.ts",
-    8:	subject : "test Subject",
-    9:	description : "test Description",
-    10:	row : 1,
-    11:	column : 1,
-    12:	comment : "test Comment",
-    13:	level : 1,
-    14:	tooltip : "test tooltip",
-    15:	tags : "Edit Tool"
-    16:},
-    17:{
-    18:	filename : "D:\\temp\\ImportErrorList\\src\\extension.ts",
-    19:	subject : "test Subject",
-    20:	description : "test Description",
-    21:	row : 2,
-    22:	column : 2,
-    23:	comment : "test Comment\r\ntest Comment",
-    24:	level : 1,
-    25:	tooltip : "test tooltip2",
-    26:	tags : "Edit"
-    27:}]
+## Features
 
+独自のエラーリストをVSCodeで読み込み、ツリー表示、ソースファイルで一括表示、ソースジャンプ出来るようにします
+
+Load your own error list with VSCode and enable tree display, bulk display of source files, and source jump.
+
+![キャプチャ](https://github.com/kawamoto0401/ImportErrorList/blob/master/media/cap1.PNG)
+
+VSCodeが未対応のツール（例えば静的確認やテストツール）の結果をテキストファイルで見るよりは、VScodeで表示した方が解析しやすいと思い作成
+テキストファイルを独自のJSONファイルにすることで読み込むことができるようにしますので、別途、Python等で変換が必要になります
+
+I created this because I thought it would be easier to analyze the results of tools that are not supported by VSCode (e.g. static confirmation or testing tools), rather than viewing them in a text file.
+Since the text file can be read by converting it into a unique JSON file, you will need to convert it separately using Python, etc.
+
+
+### JSONファイルの構造
+(詳細は https://github.com/kawamoto0401/ImportErrorList/blob/master/sample/data.json 参照)
+
+```json
+{
+  "ImportErrorList": {
+    "version": "1.0"
+  },
+  "data": [
+    {
+      "filename": "D:\\temp\\ImportErrorList\\src\\extension.ts",
+      "subject": "test Subject",
+      "description": "test Description",
+      "row": 1,
+      "column": 1,
+      "comment": "test Comment",
+      "level": 1,
+      "tooltip": "test tooltip",
+      "tags": "Edit Tool"
+    },
+    {
+      "filename": "D:\\temp\\ImportErrorList\\src\\extension.ts",
+      "subject": "test Subject",
+      "description": "test Description",
+      "row": 2,
+      "column": 2,
+      "comment": "test Comment\r\ntest Comment",
+      "level": 1,
+      "tooltip": "test tooltip2",
+      "tags": "Edit"
+    }
+  ]
+}
 1-4 Aplのチェックコード
 7：filename(ファイルパス)
 8：subject(題名)
@@ -43,8 +64,12 @@ VSCodeが未対応のツール(例えば静的確認やテストツール)の結
 13：level(レベル 1：Red 2：Yellow 3:Blue)
 14：tooltip(ツールチップ )
 15：tags(タグ)
+```
 
+### Known Issues
 
-↓Json作成ソース(Python)
+多言語対応していません
+日本語のみです
 
-
+Not multilingual
+Japanese only
