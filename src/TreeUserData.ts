@@ -225,25 +225,32 @@ export class TreeUserData {
 
         // パス区切り文字で分割
         const pathArray = filePath.split(/[/\\]/);
-        let passCnt = 0;
+        if( pathArray.length === 0 ) {
+            return;
+        }
+
+        let pathCnt = 0;
+        if( pathArray[0].length === 0 ) {
+            pathCnt = 1;
+        } 
 
         let node = this.getNode( undefined, this.treeItemID.file);
         if( !node ) {
             return;
         }
 
-        this.addFileRecursion( 0, node, filePath, pathArray, str, passCnt, dataId, level);
+        this.addFileRecursion( 0, node, filePath, pathArray, str, pathCnt, dataId, level);
     }
 
 
-    private addFileRecursion(num : number, node : Node<NodeType>, filePath: string, pathArray: string[], str: string, passCnt: number, dataId: number, level: number){
+    private addFileRecursion(num : number, node : Node<NodeType>, filePath: string, pathArray: string[], str: string, pathCnt: number, dataId: number, level: number){
 
         if(( !this.tree ) || (( !this.root ))){
             return;
         }
 
         if( node.children.length === 0 ) {
-            for (let index2 = passCnt; index2 < pathArray.length; index2++) {
+            for (let index2 = pathCnt; index2 < pathArray.length; index2++) {
                 const element = pathArray[index2];
 
                 let idTmp = this.treeItemID.user + this.count;
@@ -275,43 +282,43 @@ export class TreeUserData {
         for (let index = 0; index < node.children.length; index++) {
             const element = node.children[index];
 
-            if(element.model.name === pathArray[passCnt] ) {
+            if(element.model.name === pathArray[pathCnt] ) {
                 // 一致なら次の文字へ
-                passCnt++;
-                this.addFileRecursion(num + 1, element, filePath, pathArray, str, passCnt, dataId, level);
-                return;
-            }else {
-                // 不一致ならNodeを追加
-                for (let index2 = passCnt; index2 < pathArray.length; index2++) {
-                    const element = pathArray[index2];
-
-                    let idTmp = this.treeItemID.user + this.count;
-                    this.count++;
-
-                    node = node.addChild(this.tree.parse({ id: idTmp, name: element, dataID: 0, toolTip: "", type: this.treeItemType.none }));                    
-                }
-
-                let idTmp = this.treeItemID.user + this.count;
-                this.count++;
-
-                switch (level) {
-                    case this.treeItemType.comment:
-                        node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.comment }));
-                        break;
-
-                    case this.treeItemType.warning:
-                        node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.warning }));
-                        break;
-
-                    case this.treeItemType.error:
-                    default:
-                        node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.error }));
-                        break;
-                }
-
+                pathCnt++;
+                this.addFileRecursion(num + 1, element, filePath, pathArray, str, pathCnt, dataId, level);
                 return;
             }
         }
+
+        // 不一致ならNodeを追加
+        for (let index2 = pathCnt; index2 < pathArray.length; index2++) {
+            const element = pathArray[index2];
+
+            let idTmp = this.treeItemID.user + this.count;
+            this.count++;
+
+            node = node.addChild(this.tree.parse({ id: idTmp, name: element, dataID: 0, toolTip: "", type: this.treeItemType.none }));                    
+        }
+
+        let idTmp = this.treeItemID.user + this.count;
+        this.count++;
+
+        switch (level) {
+            case this.treeItemType.comment:
+                node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.comment }));
+                break;
+
+            case this.treeItemType.warning:
+                node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.warning }));
+                break;
+
+            case this.treeItemType.error:
+            default:
+                node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.error }));
+                break;
+        }
+
+        return;
     }
 
 
@@ -391,35 +398,4 @@ export class TreeUserData {
             this.outputRecursion( num + 1, element );
         }
     }
-}
-
-
-export function treeTest() {
-	
-    let treeUserData = TreeUserData.getInstance();
-
-    treeUserData.init();
-
-    // treeUserData.addSubject("test2", "test2-1", 1 );
-    // treeUserData.addSubject("test2", "test2-2", 2 );
-    // treeUserData.addSubject("test2", "test2-3", 3 );
-    // treeUserData.addSubject("test3", "test3-1", 4 );
-    // treeUserData.addSubject("test3", "test3-2", 5 );
-
-    // treeUserData.addTag("test4", "test4-1", 6 );
-    // treeUserData.addTag("test4", "test4-2", 7 );
-
-    // treeUserData.addFile("C:/Users/user/Documents/data.txt", 8 );
-    // treeUserData.addFile("C:/Users/user/Documents/user.txt", 9 );
-    // treeUserData.addFile("C:/Users/user2/Documents/user.txt", 10 );
-
-    // const idEq = (id: number) => (node: Node<NodeType>) => {
-    //     return node.model.id === id;
-    // };
-
-    // let node = treeUserData.root.first(idEq(11));
-
-    // let node2 = treeUserData.root.first(idEq(122));
-
-    treeUserData.output();
 }

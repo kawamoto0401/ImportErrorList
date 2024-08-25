@@ -11,10 +11,10 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
     this.view = webviewView;
 
     webviewView.title = 'Comment(コメント)';
-    webviewView.webview.html = this.getWebviewContent('-', '-');
+    webviewView.webview.html = this.getWebviewContent('-', '-', '-');
   }
 
-  public getWebviewContent(description : string, commnent: string) {
+  public getWebviewContent(subject: string, description : string, commnent: string) {
     return `
       <!DOCTYPE html>
       <html lang="ja">
@@ -24,8 +24,10 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
         <title>WebView Example</title>
       </head>
       <body>
-      <label fot="description">${description}</label>
+      <label fot="description">${subject}</label>
       <br>
+      <body>
+      <label fot="description">${description}</label>
       <br>
       <label fot="commnent">${commnent}</label>
       </body>
@@ -33,18 +35,19 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
     `;
   }
 
-  public chgComment(description : string, commnent: string) {
+  public chgComment(subject: string, description : string, commnent: string) {
 
     if (this.view) {
 
       // XSS対策で、HTML特殊文字をエスケープさせて対策
+      const subjectTmp = this.escapeHTML( subject );
       const descriptionTmp = this.escapeHTML( description );
       const commnentTmp = this.escapeHTML( commnent );
 
       // 改行コードを判定し、HTMLの<BR>に変換する
       const commnentTmp2 = commnentTmp.replace(/\r?\n/g, '<br>');
 
-      this.view.webview.html = this.getWebviewContent(descriptionTmp, commnentTmp2);
+      this.view.webview.html = this.getWebviewContent(subjectTmp, descriptionTmp, commnentTmp2);
     }
   }
 

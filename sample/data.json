@@ -128,6 +128,39 @@
             "level" : 1,
             "tooltip" : "",
             "tags" : ""
+        },
+        {
+            "filename" : "D:\\temp2\\ImportErrorList\\src\\extension.ts",
+            "subject" : "Path Test Data",
+            "description" : "Path Test Data Description",
+            "row" : 2,
+            "column" : 4,
+            "comment" : "",
+            "level" : 3,
+            "tooltip" : "",
+            "tags" : ""
+        },
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension2.ts",
+            "subject" : "Path Test Data",
+            "description" : "Path Test Data Description",
+            "row" : 2,
+            "column" : 4,
+            "comment" : "",
+            "level" : 3,
+            "tooltip" : "",
+            "tags" : ""
+        },
+        {
+            "filename" : "\\temp\\ImportErrorList\\src\\extension.ts",
+            "subject" : "Unix Path test Subject",
+            "description" : "Unix Path ",
+            "row" : 51,
+            "column" : 1,
+            "comment" : "Unix Path ",
+            "level" : 1,
+            "tooltip" : "",
+            "tags" : ""
         }
     ]
 }

@@ -207,9 +207,13 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			if( node.dataID === id ) {
 
 				// Webviewに反映させる
+				let subject = '-';
 				let description = '-';
 				let comment = '-';
 
+				if( undefined !== this.userDataList[index].subject ) {
+					subject = this.userDataList[index].subject;
+				}
 				if( undefined !== this.userDataList[index].description ) {
 					description = this.userDataList[index].description;
 				}
@@ -217,7 +221,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					comment = this.userDataList[index].comment;
 				}
 
-				this.webViewProvider.chgComment(description, comment);
+				this.webViewProvider.chgComment(subject, description, comment);
 
 
 				const filename = this.userDataList[index].filename;
@@ -429,7 +433,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					}
 				}
 				if( 0 === rows.length ) {
-					return;
+					continue;
 				}
 
 				// 非同期はthiisが使えないため参照する
