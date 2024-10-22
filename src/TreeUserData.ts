@@ -3,9 +3,9 @@ import Tree from 'ts-tree-structure';
 import type { Node } from 'ts-tree-structure';;
 
 
-type NodeType = { id: number, name: string, dataID: number, toolTip: string, type: number};
+type NodeType = { id: number, name: string, row: number, dataID: number, toolTip: string, type: number};
 
-
+// ツリーデータの内部データ
 export class TreeUserData {
 
     /**
@@ -39,7 +39,7 @@ export class TreeUserData {
         user: 100               // これ以降を使用
     } as const;
 
-    public treeItemType = {
+    public treeItemWarningLevel = {
         none: 0,
         comment: 3,
         warning: 2,
@@ -72,27 +72,27 @@ export class TreeUserData {
             id: 1,
             name: "",
             toolTip: "",
-            type: this.treeItemType.none,
+            type: this.treeItemWarningLevel.none,
             children: [
             {
                 id: 10,
                 name: "Subject",
                 toolTip: "",
-                type: this.treeItemType.none,
+                type: this.treeItemWarningLevel.none,
                 children: [],
             },
             {
                 id: 11,
                 name: "File",
                 toolTip: "",
-                type: this.treeItemType.none,
+                type: this.treeItemWarningLevel.none,
                 children: [],
             },
             {
                 id: 12,
                 name: "Tag",
                 toolTip: "",
-                type: this.treeItemType.none,
+                type: this.treeItemWarningLevel.none,
                 children: [],
             },
             ],
@@ -126,7 +126,7 @@ export class TreeUserData {
     }
 
 
-    public addTag(folderName: string, str: string, dataId: number, level: number){
+    public addTag(folderName: string, str: string, row: number, dataId: number, level: number){
         if(( !this.tree ) || (( !this.root ))){
             return;
         }
@@ -147,31 +147,39 @@ export class TreeUserData {
             }
         }
         if( !isHit ) {
-            let idTmp = this.treeItemID.user + this.count;
-            this.count++;
-            node = node.addChild(this.tree.parse({ id: idTmp, name: folderName, dataID: 0, toolTip: str, type: this.treeItemType.none}));
+            // let idTmp = this.treeItemID.user + this.count;
+            // this.count++;
+
+            node = this.addChild( node, folderName, row, dataId, str, this.treeItemWarningLevel.none);
+            if( node === undefined ) {
+                return;
+            }
+
+            // node = node.addChild(this.tree.parse({ id: idTmp, name: folderName, row:row, dataID: 0, toolTip: str, type: this.treeItemWarningLevel.none}));
         }
 
-        let idTmp = this.treeItemID.user + this.count;
-        this.count++;
+        this.addChild( node, str, row, dataId, str, level);
 
-        switch (level) {
-            case this.treeItemType.comment:
-               node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.comment }));
-                break;
+        // let idTmp = this.treeItemID.user + this.count;
+        // this.count++;
 
-            case this.treeItemType.warning:
-               node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.warning }));
-                break;
+        // switch (level) {
+        //     case this.treeItemWarningLevel.comment:
+        //        node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.comment }));
+        //         break;
+
+        //     case this.treeItemWarningLevel.warning:
+        //        node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.warning }));
+        //         break;
                 
-            case this.treeItemType.error:
-            default:
-                node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.error }));
-                break;
-        }
+        //     case this.treeItemWarningLevel.error:
+        //     default:
+        //         node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.error }));
+        //         break;
+        // }
     }
 
-    public addSubject(folderName: string, str: string, dataId: number, level: number){
+    public addSubject(folderName: string, str: string, row: number, dataId: number, level: number){
  
         if(( !this.tree ) || (( !this.root ))){
             return;
@@ -195,29 +203,29 @@ export class TreeUserData {
         if( !isHit ) {
             let idTmp = this.treeItemID.user + this.count;
             this.count++;
-            node = node.addChild(this.tree.parse({ id: idTmp, name: folderName, dataID: 0, toolTip: str, type: this.treeItemType.none }));
+            node = node.addChild(this.tree.parse({ id: idTmp, name: folderName, row:row, dataID: 0, toolTip: str, type: this.treeItemWarningLevel.none }));
         }
         
         let idTmp = this.treeItemID.user + this.count;
         this.count++;
 
         switch (level) {
-            case this.treeItemType.comment:
-               node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.comment }));
+            case this.treeItemWarningLevel.comment:
+               node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.comment }));
                 break;
 
-            case this.treeItemType.warning:
-               node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.warning }));
+            case this.treeItemWarningLevel.warning:
+               node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.warning }));
                 break;
 
-            case this.treeItemType.error:
+            case this.treeItemWarningLevel.error:
             default:
-                node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.error }));
+                node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.error }));
                 break;
         }
    }
 
-    public addFile(filePath: string, str: string, dataId: number, level: number){
+    public addFile(filePath: string, str: string, row: number, dataId: number, level: number){
 
         if(( !this.tree ) || (( !this.root ))){
             return;
@@ -239,11 +247,11 @@ export class TreeUserData {
             return;
         }
 
-        this.addFileRecursion( 0, node, filePath, pathArray, str, pathCnt, dataId, level);
+        this.addFileRecursion( 0, node, filePath, pathArray, str, pathCnt, row, dataId, level);
     }
 
 
-    private addFileRecursion(num : number, node : Node<NodeType>, filePath: string, pathArray: string[], str: string, pathCnt: number, dataId: number, level: number){
+    private addFileRecursion(num : number, node : Node<NodeType>, filePath: string, pathArray: string[], str: string, pathCnt: number, row: number, dataId: number, level: number){
 
         if(( !this.tree ) || (( !this.root ))){
             return;
@@ -256,24 +264,24 @@ export class TreeUserData {
                 let idTmp = this.treeItemID.user + this.count;
                 this.count++;
 
-                node = node.addChild(this.tree.parse({ id: idTmp, name: element, dataID: 0, toolTip: "", type: this.treeItemType.none }));
+                node = node.addChild(this.tree.parse({ id: idTmp, name: element, row:row, dataID: 0, toolTip: "", type: this.treeItemWarningLevel.none }));
             }
 
             let idTmp = this.treeItemID.user + this.count;
             this.count++;
 
             switch (level) {
-                case this.treeItemType.comment:
-                   node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.comment }));
+                case this.treeItemWarningLevel.comment:
+                   node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.comment }));
                     break;
     
-                case this.treeItemType.warning:
-                   node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.warning }));
+                case this.treeItemWarningLevel.warning:
+                   node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.warning }));
                     break;
     
-                case this.treeItemType.error:
+                case this.treeItemWarningLevel.error:
                 default:
-                    node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.error }));
+                    node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.error }));
                     break;
             }
             return;
@@ -285,7 +293,7 @@ export class TreeUserData {
             if(element.model.name === pathArray[pathCnt] ) {
                 // 一致なら次の文字へ
                 pathCnt++;
-                this.addFileRecursion(num + 1, element, filePath, pathArray, str, pathCnt, dataId, level);
+                this.addFileRecursion(num + 1, element, filePath, pathArray, str, pathCnt, row, dataId, level);
                 return;
             }
         }
@@ -297,30 +305,114 @@ export class TreeUserData {
             let idTmp = this.treeItemID.user + this.count;
             this.count++;
 
-            node = node.addChild(this.tree.parse({ id: idTmp, name: element, dataID: 0, toolTip: "", type: this.treeItemType.none }));                    
+            node = node.addChild(this.tree.parse({ id: idTmp, name: element, row:row, dataID: 0, toolTip: "", type: this.treeItemWarningLevel.none }));                    
         }
 
         let idTmp = this.treeItemID.user + this.count;
         this.count++;
 
         switch (level) {
-            case this.treeItemType.comment:
-                node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.comment }));
+            case this.treeItemWarningLevel.comment:
+                node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.comment }));
                 break;
 
-            case this.treeItemType.warning:
-                node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.warning }));
+            case this.treeItemWarningLevel.warning:
+                node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.warning }));
                 break;
 
-            case this.treeItemType.error:
+            case this.treeItemWarningLevel.error:
             default:
-                node.addChild(this.tree.parse({ id: idTmp, name: str, dataID: dataId, toolTip: str, type: this.treeItemType.error }));
+                node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.error }));
                 break;
         }
 
         return;
     }
 
+    private addChild(node : Node<NodeType>, str: string, row: number, dataId: number, toolTipStr: string, level: number) : Node<NodeType> | undefined{
+        
+        if(( !this.tree ) || (( !this.root ))){
+            return undefined;
+        }
+
+        let idTmp = this.treeItemID.user + this.count;
+        this.count++;  
+
+        let nodeResult;
+
+        let index = 0;
+        for (index = 0; index < node.children.length; index++) {
+            const element = node.children[index];
+
+            if( element.model.name === str ) {
+                if( element.model.row > row ) {
+                    break;
+                }
+            }else {
+                if( element.model.name > str ) {
+                    break;
+                }
+            }            
+        }
+        if( this.treeItemWarningLevel.comment === level || this.treeItemWarningLevel.warning === level || this.treeItemWarningLevel.error === level || this.treeItemWarningLevel.none === level ) {
+            nodeResult = node.addChildAtIndex(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: toolTipStr, type: level }), index);
+        }else {
+            nodeResult = node.addChildAtIndex(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: toolTipStr, type: this.treeItemWarningLevel.error }), index);
+        }
+
+        return nodeResult;
+    }
+
+
+    public pruneFile(){
+
+        if(( !this.tree ) || (( !this.root ))){
+            return;
+        }
+
+        let node = this.getNode( undefined, this.treeItemID.file);
+        if( !node ) {
+            return;
+        }
+
+        for (let index = 0; index < node.children.length; index++) {
+            const element = node.children[index];
+
+            this.pruneFileRecursion(0, element);          
+        }
+    }
+
+
+    private pruneFileRecursion(num : number, node : Node<NodeType>){
+
+        if(( !this.tree ) || (( !this.root ))){
+            return;
+        }
+
+        if( node.children.length === 1 ) {
+            // 子の名称を親に付け足す
+            node.model.name = node.model.name + '/' + node.children[0].model.name;
+
+            // 孫のノードを親にぶら下げる
+            for (let index = 0; index < node.children[0].children.length; index++) {
+                const elementChildren = node.children[0].children[index];
+                
+                node.addChild(elementChildren);
+            }
+
+            // 不要な子を削除する
+            node.children[0].drop();
+        }
+        else {
+            for (let index = 0; index < node.children.length; index++) {
+                const element = node.children[index];
+    
+                this.pruneFileRecursion(num + 1, element);          
+            }
+        }
+
+        return;
+    }
 
 
     public getTreeNode(id: number): { name: string, dataID: number, toolTip: string, type: number } | undefined {

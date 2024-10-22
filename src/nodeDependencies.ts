@@ -42,7 +42,7 @@ class UserData {
 	}
 }
 
-const treeItemType = {
+const treeItemWarningLevel = {
 	none: 0,
 	comment: 3,
 	warning: 2,
@@ -317,18 +317,21 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 
 						// TreeDataを生成する
-						treeUserData.addSubject(subject, data[cnt1].filename + ":" + data[cnt1].row, this.id, data[cnt1].level);
+						treeUserData.addSubject(subject, data[cnt1].filename + ":" + data[cnt1].row, data[cnt1].row, this.id, data[cnt1].level);
 						
-						treeUserData.addFile(data[cnt1].filename, data[cnt1].row + ":" + subject, this.id, data[cnt1].level);
+						treeUserData.addFile(data[cnt1].filename, data[cnt1].row + ":" + subject, data[cnt1].row, this.id, data[cnt1].level);
 
 						for (let cnt2 = 0; cnt2 < taglist.length; cnt2++) {
 							const element = taglist[cnt2];
-							treeUserData.addTag(element, data[cnt1].filename + ":" + data[cnt1].row, this.id, data[cnt1].level);
+							treeUserData.addTag(element, data[cnt1].filename + ":" + data[cnt1].row, data[cnt1].row, this.id, data[cnt1].level);
 
 						}
 
 						this.id++;
 					}
+
+					// 不要な枝を削除する
+					treeUserData.pruneFile();
 
 					// デバッグ用
 					treeUserData.output();
@@ -509,14 +512,14 @@ export class Dependency extends vscode.TreeItem {
 		this.tooltip = tooltip;
 
 		switch (type) {
-			case treeItemType.none:
+			case treeItemWarningLevel.none:
 				this.iconPath = {
 					light: path.join(__filename, '..', '..', 'resources', 'light', 'folder.svg'),
 					dark: path.join(__filename, '..', '..', 'resources', 'dark', 'folder.svg')
 				};
 				break;
 
-			case treeItemType.comment:
+			case treeItemWarningLevel.comment:
 				this.iconPath = {
 					light: path.join(__filename, '..', '..', 'resources', 'light', 'file_b.svg'),
 					dark: path.join(__filename, '..', '..', 'resources', 'dark', 'file_b.svg')
@@ -524,7 +527,7 @@ export class Dependency extends vscode.TreeItem {
 				this.contextValue = 'dependency';
 				break;
 
-			case treeItemType.warning:
+			case treeItemWarningLevel.warning:
 				this.iconPath = {
 					light: path.join(__filename, '..', '..', 'resources', 'light', 'file_e.svg'),
 					dark: path.join(__filename, '..', '..', 'resources', 'dark', 'file_e.svg')
@@ -533,7 +536,7 @@ export class Dependency extends vscode.TreeItem {
 				this.contextValue = 'dependency';
 				break;
 
-			case treeItemType.error:
+			case treeItemWarningLevel.error:
 			default:
 					this.iconPath = {
 					light: path.join(__filename, '..', '..', 'resources', 'light', 'file_r.svg'),

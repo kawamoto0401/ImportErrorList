@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import Tree from 'ts-tree-structure';
 
-
+// ツリーリスト
 export class NodeDependenciesProvider implements vscode.TreeDataProvider<Dependency> {
   constructor(private workspaceRoot: string) {}
 

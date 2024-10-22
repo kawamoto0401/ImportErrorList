@@ -6,7 +6,7 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
 
   constructor(private extensionUri: vscode.Uri) { }
 
-  //
+  // WebViewView
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     this.view = webviewView;
 
