@@ -37,7 +37,7 @@
             "tags" : "Edit Tool"
         },
         {
-            "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts2",
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension3.ts",
             "subject" : "test tooltip tags Subject",
             "description" : "test tooltip tags Description",
             "row" : 1,
@@ -151,6 +151,17 @@
             "tooltip" : "",
             "tags" : ""
         },
+        {
+            "filename" : "D:\\temp\\ImportErrorList\\src\\extension4.ts",
+            "subject" : "Path Test Data",
+            "description" : "Path Test Data Description",
+            "row" : 3,
+            "column" : 4,
+            "comment" : "",
+            "level" : 3,
+            "tooltip" : "",
+            "tags" : ""
+        },        
         {
             "filename" : "\\server\\temp\\ImportErrorList\\src\\extension.ts",
             "subject" : "Unix Path test Subject",

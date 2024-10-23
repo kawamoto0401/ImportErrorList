@@ -32,11 +32,14 @@ export class TreeUserData {
     private count: number = 0;
 
     public treeItemID = {
-        root: 1,                // 固定
-        subject: 10,
-        file: 11,
-        tag: 12,
-        user: 100               // これ以降を使用
+        none: 0,                //
+        root: 1,                // ↓固定
+        subjectRoot: 10,
+        fileRoot: 11,
+        tagRoot: 12,
+        dir: 13,
+        file: 14,
+        user: 100               // ↓これ以降を通常は使用
     } as const;
 
     public treeItemWarningLevel = {
@@ -75,21 +78,21 @@ export class TreeUserData {
             type: this.treeItemWarningLevel.none,
             children: [
             {
-                id: 10,
+                id: this.treeItemID.subjectRoot,
                 name: "Subject",
                 toolTip: "",
                 type: this.treeItemWarningLevel.none,
                 children: [],
             },
             {
-                id: 11,
+                id: this.treeItemID.fileRoot,
                 name: "File",
                 toolTip: "",
                 type: this.treeItemWarningLevel.none,
                 children: [],
             },
             {
-                id: 12,
+                id: this.treeItemID.tagRoot,
                 name: "Tag",
                 toolTip: "",
                 type: this.treeItemWarningLevel.none,
@@ -131,7 +134,7 @@ export class TreeUserData {
             return;
         }
         
-        let node = this.getNode(undefined, this.treeItemID.tag);
+        let node = this.getNode(undefined, this.treeItemID.tagRoot);
         if( !node ) {
             return;
         }
@@ -147,36 +150,13 @@ export class TreeUserData {
             }
         }
         if( !isHit ) {
-            // let idTmp = this.treeItemID.user + this.count;
-            // this.count++;
-
-            node = this.addChild( node, folderName, row, dataId, str, this.treeItemWarningLevel.none);
+            node = this.addChild( node, folderName, row, 0, str, this.treeItemWarningLevel.none);
             if( node === undefined ) {
                 return;
             }
-
-            // node = node.addChild(this.tree.parse({ id: idTmp, name: folderName, row:row, dataID: 0, toolTip: str, type: this.treeItemWarningLevel.none}));
         }
 
         this.addChild( node, str, row, dataId, str, level);
-
-        // let idTmp = this.treeItemID.user + this.count;
-        // this.count++;
-
-        // switch (level) {
-        //     case this.treeItemWarningLevel.comment:
-        //        node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.comment }));
-        //         break;
-
-        //     case this.treeItemWarningLevel.warning:
-        //        node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.warning }));
-        //         break;
-                
-        //     case this.treeItemWarningLevel.error:
-        //     default:
-        //         node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.error }));
-        //         break;
-        // }
     }
 
     public addSubject(folderName: string, str: string, row: number, dataId: number, level: number){
@@ -185,7 +165,7 @@ export class TreeUserData {
             return;
         }
  
-        let node = this.getNode(undefined, this.treeItemID.subject);
+        let node = this.getNode(undefined, this.treeItemID.subjectRoot);
         if( !node ) {
             return;
         }
@@ -201,28 +181,13 @@ export class TreeUserData {
             }
         }
         if( !isHit ) {
-            let idTmp = this.treeItemID.user + this.count;
-            this.count++;
-            node = node.addChild(this.tree.parse({ id: idTmp, name: folderName, row:row, dataID: 0, toolTip: str, type: this.treeItemWarningLevel.none }));
+            node = this.addChild( node, folderName, row, 0, str, this.treeItemWarningLevel.none);
+            if( node === undefined ) {
+                return;
+            }
         }
-        
-        let idTmp = this.treeItemID.user + this.count;
-        this.count++;
 
-        switch (level) {
-            case this.treeItemWarningLevel.comment:
-               node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.comment }));
-                break;
-
-            case this.treeItemWarningLevel.warning:
-               node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.warning }));
-                break;
-
-            case this.treeItemWarningLevel.error:
-            default:
-                node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.error }));
-                break;
-        }
+        this.addChild( node, str, row, dataId, str, level);
    }
 
     public addFile(filePath: string, str: string, row: number, dataId: number, level: number){
@@ -242,7 +207,7 @@ export class TreeUserData {
             pathCnt = 1;
         } 
 
-        let node = this.getNode( undefined, this.treeItemID.file);
+        let node = this.getNode( undefined, this.treeItemID.fileRoot);
         if( !node ) {
             return;
         }
@@ -257,78 +222,64 @@ export class TreeUserData {
             return;
         }
 
+        // 子がいない時は、フォルダ名を枝にして追加していく
         if( node.children.length === 0 ) {
-            for (let index2 = pathCnt; index2 < pathArray.length; index2++) {
+           for (let index2 = pathCnt; index2 < pathArray.length; index2++) {
                 const element = pathArray[index2];
 
-                let idTmp = this.treeItemID.user + this.count;
-                this.count++;
+                let dataId : number = this.treeItemID.dir;
+                if( index2 === pathArray.length - 1 ) {
+                    dataId = this.treeItemID.file;
+                }
 
-                node = node.addChild(this.tree.parse({ id: idTmp, name: element, row:row, dataID: 0, toolTip: "", type: this.treeItemWarningLevel.none }));
+                let nodeTmp = this.addChild( node, element, row, dataId, "", this.treeItemWarningLevel.none);
+                if( nodeTmp === undefined ) {
+                    return;
+                }
+                node = nodeTmp;
             }
-
-            let idTmp = this.treeItemID.user + this.count;
-            this.count++;
-
-            switch (level) {
-                case this.treeItemWarningLevel.comment:
-                   node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.comment }));
-                    break;
     
-                case this.treeItemWarningLevel.warning:
-                   node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.warning }));
-                    break;
+            // エラー名を追加
+            this.addChild( node, str, row, dataId, str, level);
+        }
+        // 子があるときは、重複しないかを確認する
+        else {
+            for (let index = 0; index < node.children.length; index++) {
+                const element = node.children[index];
     
-                case this.treeItemWarningLevel.error:
-                default:
-                    node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.error }));
-                    break;
+                if(element.model.name === pathArray[pathCnt] ) {
+                    // 一致なら次の文字へ
+                    pathCnt++;
+                    this.addFileRecursion(num + 1, element, filePath, pathArray, str, pathCnt, row, dataId, level);
+                    return;
+                }
             }
-            return;
-        }
+    
+            // 不一致ならNodeを追加
+            for (let index2 = pathCnt; index2 < pathArray.length; index2++) {
+                const element = pathArray[index2];
+    
+                let dataId : number = this.treeItemID.dir;
+                if( index2 === pathArray.length - 1 ) {
+                    dataId = this.treeItemID.file;
+                }
 
-        for (let index = 0; index < node.children.length; index++) {
-            const element = node.children[index];
-
-            if(element.model.name === pathArray[pathCnt] ) {
-                // 一致なら次の文字へ
-                pathCnt++;
-                this.addFileRecursion(num + 1, element, filePath, pathArray, str, pathCnt, row, dataId, level);
-                return;
+                let nodeTmp  = this.addChild( node, element, row, dataId, "", this.treeItemWarningLevel.none);
+                if( nodeTmp === undefined ) {
+                    return;
+                }
+    
+                node = nodeTmp;
             }
-        }
-
-        // 不一致ならNodeを追加
-        for (let index2 = pathCnt; index2 < pathArray.length; index2++) {
-            const element = pathArray[index2];
-
-            let idTmp = this.treeItemID.user + this.count;
-            this.count++;
-
-            node = node.addChild(this.tree.parse({ id: idTmp, name: element, row:row, dataID: 0, toolTip: "", type: this.treeItemWarningLevel.none }));                    
-        }
-
-        let idTmp = this.treeItemID.user + this.count;
-        this.count++;
-
-        switch (level) {
-            case this.treeItemWarningLevel.comment:
-                node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.comment }));
-                break;
-
-            case this.treeItemWarningLevel.warning:
-                node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.warning }));
-                break;
-
-            case this.treeItemWarningLevel.error:
-            default:
-                node.addChild(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: str, type: this.treeItemWarningLevel.error }));
-                break;
+    
+             // エラー名を追加
+             this.addChild( node, str, row, dataId, str, level);
         }
 
         return;
     }
 
+    //
     private addChild(node : Node<NodeType>, str: string, row: number, dataId: number, toolTipStr: string, level: number) : Node<NodeType> | undefined{
         
         if(( !this.tree ) || (( !this.root ))){
@@ -363,14 +314,14 @@ export class TreeUserData {
         return nodeResult;
     }
 
-
+    // 
     public pruneFile(){
 
         if(( !this.tree ) || (( !this.root ))){
             return;
         }
 
-        let node = this.getNode( undefined, this.treeItemID.file);
+        let node = this.getNode( undefined, this.treeItemID.fileRoot);
         if( !node ) {
             return;
         }
@@ -389,7 +340,16 @@ export class TreeUserData {
             return;
         }
 
+        if( node.model.dataID !== this.treeItemID.dir ) {
+            return;
+        }
+
+        // 子が1つの時は、親に孫を移動させる
         if( node.children.length === 1 ) {
+            if( node.children[0].model.dataID === this.treeItemID.file ) {
+                return;
+            }
+
             // 子の名称を親に付け足す
             node.model.name = node.model.name + '/' + node.children[0].model.name;
 
@@ -402,6 +362,8 @@ export class TreeUserData {
 
             // 不要な子を削除する
             node.children[0].drop();
+
+            this.pruneFileRecursion(num + 1, node);          
         }
         else {
             for (let index = 0; index < node.children.length; index++) {
