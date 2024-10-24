@@ -9,12 +9,12 @@ import { TreeUserData } from './TreeUserData';
 // ErrorDataのマスタ情報
 class UserData {
 	constructor(
-		/// 
+		///
 		public readonly filename: string,
 		public readonly subject : string,
 		public readonly description : string,
-		public readonly row : number, 
-		public readonly column: number, 
+		public readonly row : number,
+		public readonly column: number,
 		public readonly level : number,
 		public readonly comment : string,
 		public readonly tooltip: string,
@@ -63,7 +63,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 	// ガーターアイコンを管理する
 	private gutterIconMng : GutterIconMng;
- 
+
 	constructor(private webViewProvider: WebViewProvider ) {
 		this.userDataList = [];
 
@@ -73,7 +73,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 		this.gutterIconMng  = new GutterIconMng;
 	}
 
-	// 
+	//
 	refresh(): void {
 		console.log("### refresh ");
 		this._onDidChangeTreeData.fire();
@@ -126,7 +126,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	}
 
 	// ツリーの表示
-	// 
+	//
 	getTreeItem(element: Dependency): vscode.TreeItem {
 		console.log("### getTreeItem ");
 	
@@ -134,7 +134,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	}
 
 	// 子ツリーの表示
-	// 
+	//
 	getChildren(element?: Dependency): Thenable<Dependency[]> {
 		if (element) {
 			let treeUserData = TreeUserData.getInstance();
@@ -252,9 +252,9 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	getjson() : void {
 
 		const userfile = vscode.window.showOpenDialog({
-			canSelectFiles: true, 
-			canSelectFolders: false, 
-			canSelectMany: false, 
+			canSelectFiles: true,
+			canSelectFolders: false,
+			canSelectMany: false,
 			title: 'Select JSON file to open',
 			filters: {
 				// eslint-disable-next-line @typescript-eslint/naming-convention
@@ -296,15 +296,15 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 					for (let cnt1 = 0; cnt1 < data.length; cnt1++) {
 
-						let subject = "No subject"; 
+						let subject = "No subject";
 						if( 0 < data[cnt1].subject.length ) {
 							subject = data[cnt1].subject;
 						}
-						let description = "No description"; 
+						let description = "No description";
 						if( 0 < data[cnt1].description.length ) {
 							description = data[cnt1].description;
 						}
-						let tooltip = data[cnt1].subject + " " + data[cnt1].filename + ":" + data[cnt1].row; 
+						let tooltip = data[cnt1].subject + " " + data[cnt1].filename + ":" + data[cnt1].row;
 						if( 0 < data[cnt1].tooltip.length ) {
 							tooltip = data[cnt1].tooltip;
 						}

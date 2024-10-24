@@ -117,7 +117,7 @@
             "level" : 3,
             "tooltip" : "",
             "tags" : ""
-        },        
+        },
         {
             "filename" : "D:\\temp\\ImportErrorList\\src\\extension.ts",
             "subject" : "XSS test Subject",
@@ -161,7 +161,7 @@
             "level" : 3,
             "tooltip" : "",
             "tags" : ""
-        },        
+        },
         {
             "filename" : "\\server\\temp\\ImportErrorList\\src\\extension.ts",
             "subject" : "Unix Path test Subject",

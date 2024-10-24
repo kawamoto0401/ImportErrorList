@@ -53,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
 		nodeDependenciesProvider.getjson();
 	});
 
-	// アクティブなエディターが変更されたときに発生するイベント 
+	// アクティブなエディターが変更されたときに発生するイベント
 	vscode.window.onDidChangeActiveTextEditor(textEditor => { nodeDependenciesProvider.updateEditorDecorations(textEditor); });
 
 	// テキストドキュメントが変更されたときに発行されるイベント

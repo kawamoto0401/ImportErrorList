@@ -62,14 +62,14 @@ export class GutterIconMng {
 
         let ranges : vscode.Range[] = [];
 
-        // 
+        //
         for (const row of rows) {
             const pos = new vscode.Position( row, 0 );
             const range = new vscode.Range(pos, pos);
 
             if( this.isGutterIconMng(filename, row)) {
                 continue;
-            }            
+            }
 
             ranges.push(range);
 
@@ -81,12 +81,12 @@ export class GutterIconMng {
             return;
         }
 
-        editor.setDecorations(decorationType, ranges);       
-   
+        editor.setDecorations(decorationType, ranges);
+
         return;
     }
 
-    
+
     // 引数にファイルパスと行数を設定
     // ハッシュから削除を行う
     deleteGutterIconMng( filename : string, row : number) {
@@ -95,7 +95,7 @@ export class GutterIconMng {
 
         if( this.gutterIconMap.has(key)) {
             const decorationType = this.gutterIconMap.get(key);
-            if( decorationType ) { 
+            if( decorationType ) {
                 decorationType.dispose();
             }
         }
@@ -118,12 +118,12 @@ export class GutterIconMng {
     deleteGutterIconMngAll() {
 
         for (const [key, decorationType] of this.gutterIconMap) {
-            if( decorationType ) { 
+            if( decorationType ) {
                 decorationType.dispose();
             }
         }
 
-        this.gutterIconMap.clear();        
+        this.gutterIconMap.clear();
     }
 
     //
@@ -132,7 +132,7 @@ export class GutterIconMng {
         let editorDecorations = new Map<TextEditorDecorationType, vscode.Range[]>();
         for (let [filePathLineNumber, decoration] of this.gutterIconMap) {
 
-            let result = filePathLineNumber.split(','); 
+            let result = filePathLineNumber.split(',');
 
             let filePath = result[0];
             let lineNumber = Number(result[1]);
@@ -157,7 +157,7 @@ export class GutterIconMng {
                     continue;
                 }
             }
- 
+
             let ranges = editorDecorations.get(decoration);
             if (typeof ranges === "undefined") {
                 ranges = new Array<vscode.Range>();
