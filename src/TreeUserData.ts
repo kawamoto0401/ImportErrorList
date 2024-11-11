@@ -232,7 +232,7 @@ export class TreeUserData {
                     dataId = this.treeItemID.file;
                 }
 
-                let nodeTmp = this.addChild( node, element, row, dataId, "", this.treeItemWarningLevel.none, true );
+                let nodeTmp = this.addChild( node, element, row, dataId, "", this.treeItemWarningLevel.none, false );
                 if( nodeTmp === undefined ) {
                     return;
                 }
@@ -264,7 +264,7 @@ export class TreeUserData {
                     dataId = this.treeItemID.file;
                 }
 
-                let nodeTmp  = this.addChild( node, element, row, dataId, "", this.treeItemWarningLevel.none, true );
+                let nodeTmp  = this.addChild( node, element, row, dataId, "", this.treeItemWarningLevel.none, false );
                 if( nodeTmp === undefined ) {
                     return;
                 }
@@ -316,7 +316,7 @@ export class TreeUserData {
                     }
                 }
             }
-            }
+        }
 
         if( this.treeItemWarningLevel.comment === level || this.treeItemWarningLevel.warning === level || this.treeItemWarningLevel.error === level || this.treeItemWarningLevel.none === level ) {
             nodeResult = node.addChildAtIndex(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: toolTipStr, type: level }), index);
