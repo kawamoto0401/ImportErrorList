@@ -294,53 +294,68 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					let treeUserData = TreeUserData.getInstance();
 					treeUserData.init();
 
-					for (let cnt1 = 0; cnt1 < data.length; cnt1++) {
+					vscode.window.withProgress({
+						location: vscode.ProgressLocation.Notification,
+						title: "Progress...",
+						cancellable: true
+					}, async(progress, token) => {
+						for (let cnt1 = 0; cnt1 < data.length; cnt1++) {
 
-						let subject = "No subject";
-						if( 0 < data[cnt1].subject.length ) {
-							subject = data[cnt1].subject;
-						}
-						let description = "No description";
-						if( 0 < data[cnt1].description.length ) {
-							description = data[cnt1].description;
-						}
-						let tooltip = data[cnt1].subject + " " + data[cnt1].filename + ":" + data[cnt1].row;
-						if( 0 < data[cnt1].tooltip.length ) {
-							tooltip = data[cnt1].tooltip;
-						}
+							if( token.isCancellationRequested) {
+								vscode.window.showInformationMessage('Operation canselled');							
+								return;
+							}
+
+							let subject = "No subject";
+							if( 0 < data[cnt1].subject.length ) {
+								subject = data[cnt1].subject;
+							}
+							let description = "No description";
+							if( 0 < data[cnt1].description.length ) {
+								description = data[cnt1].description;
+							}
+							let tooltip = data[cnt1].subject + " " + data[cnt1].filename + ":" + data[cnt1].row;
+							if( 0 < data[cnt1].tooltip.length ) {
+								tooltip = data[cnt1].tooltip;
+							}
+			
+							// tagsをスペース分割する
+							const tag : string  = data[cnt1].tags;
+							const taglist : Array<string> = tag.split(/(\s+)/).filter( e => e.trim().length > 0);
 		
-						// tagsをスペース分割する
-						const tag : string  = data[cnt1].tags;
-						const taglist : Array<string> = tag.split(/(\s+)/).filter( e => e.trim().length > 0);
+							this.userDataList.push( new UserData(data[cnt1].filename, subject, description, data[cnt1].row, data[cnt1].column, data[cnt1].level, data[cnt1].comment, tooltip, taglist, this.id));
 	
-						this.userDataList.push( new UserData(data[cnt1].filename, subject, description, data[cnt1].row, data[cnt1].column, data[cnt1].level, data[cnt1].comment, tooltip, taglist, this.id));
-
-
-						// TreeDataを生成する
-						treeUserData.addSubject(subject, data[cnt1].filename + ":" + data[cnt1].row, data[cnt1].row, this.id, data[cnt1].level);
-						
-						treeUserData.addFile(data[cnt1].filename, data[cnt1].row + ":" + subject, data[cnt1].row, this.id, data[cnt1].level);
-
-						for (let cnt2 = 0; cnt2 < taglist.length; cnt2++) {
-							const element = taglist[cnt2];
-							treeUserData.addTag(element, data[cnt1].filename + ":" + data[cnt1].row, data[cnt1].row, this.id, data[cnt1].level);
-
+	
+							// TreeDataを生成する
+							treeUserData.addSubject(subject, data[cnt1].filename + ":" + data[cnt1].row, data[cnt1].row, this.id, data[cnt1].level);
+							
+							treeUserData.addFile(data[cnt1].filename, data[cnt1].row + ":" + subject, data[cnt1].row, this.id, data[cnt1].level);
+	
+							for (let cnt2 = 0; cnt2 < taglist.length; cnt2++) {
+								const element = taglist[cnt2];
+								treeUserData.addTag(element, data[cnt1].filename + ":" + data[cnt1].row, data[cnt1].row, this.id, data[cnt1].level);
+							}
+	
+							this.id++;
+							
+							if(( cnt1 % 100 ) === 0 ) {
+								progress.report({ message: "読み込み中 " + cnt1 + "/" + data.length});
+								await new Promise(resolve => setTimeout(resolve, 1));
+							}
 						}
+	
+						// 不要な枝を削除する
+						progress.report({ message: "整理中..."});
+						treeUserData.pruneFile();
+	
+						// デバッグ用
+						// treeUserData.output();
 
-						this.id++;
-					}
-
-					// 不要な枝を削除する
-					treeUserData.pruneFile();
-
-					// デバッグ用
-					treeUserData.output();
-
+						this.refresh();
+					});
 				} catch(e) {
 					vscode.window.showInformationMessage('JSON Error');
 				}
-
-				this.refresh();
 			}
 		});
 	}
