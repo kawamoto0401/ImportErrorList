@@ -24,25 +24,25 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
         <title>WebView Example</title>
       </head>
       <body>
-      <label fot="description">${subject}</label>
+      <label fot="description">subject : ${subject}</label>
       <br>
       <body>
-      <label fot="description">${description}</label>
+      <label fot="description">description : ${description}</label>
       <br>
-      <label fot="commnent">${commnent}</label>
+      <label fot="commnent">commnent : ${commnent}</label>
       </body>
       </html>
     `;
   }
 
-  public chgComment(subject: string, description : string, commnent: string) {
+  public chgComment(subject: string, description: string, commnent: string) {
 
     if (this.view) {
 
       // XSS対策で、HTML特殊文字をエスケープさせて対策
-      const subjectTmp = this.escapeHTML( subject );
-      const descriptionTmp = this.escapeHTML( description );
-      const commnentTmp = this.escapeHTML( commnent );
+      const subjectTmp = this.escapeHTML(subject);
+      const descriptionTmp = this.escapeHTML(description);
+      const commnentTmp = this.escapeHTML(commnent);
 
       // 改行コードを判定し、HTMLの<BR>に変換する
       const commnentTmp2 = commnentTmp.replace(/\r?\n/g, '<br>');
@@ -52,12 +52,12 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
   }
 
   // HTML特殊文字をエスケープさせて対策
-  public escapeHTML(str : string ){
+  public escapeHTML(str: string) {
     return str.replace(/&/g, '&lt;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, "&#x27;");
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, "&#x27;");
   }
 }
 

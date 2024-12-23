@@ -2,7 +2,7 @@
 	"name": "importerrorlist",
 	"displayName": "ImportErrorList",
 	"description": "ImportErrorList vscode",
-	"version": "1.3.0",
+	"version": "1.4.0",
 	"publisher": "kawamoto",
 	"engines": {
 		"vscode": "^1.84.0"
