@@ -8,7 +8,7 @@ Allows VScode to read the error list independently
 
 ## Features
 
-独自のエラーリストをVSCodeで読み込み、ツリー表示、ソースファイルで一括表示、ソースジャンプ出来るようにします
+独自のエラーリスト(JSON)をVSCodeで読み込み、ツリー表示、ソースファイルで一括表示、ソースジャンプ出来るようにします
 
 Load your own error list with VSCode and enable tree display, bulk display of source files, and source jump.
 
@@ -16,7 +16,7 @@ Load your own error list with VSCode and enable tree display, bulk display of so
 
 VSCodeが未対応のツール（例えば静的確認やテストツール）の結果をテキストファイルで見るよりは、VScodeで表示した方が解析しやすいと思い作成
 
-テキストファイルを独自のJSONファイルにすることで読み込むことができるようにしますので、別途、Python等で変換が必要になります
+テキストファイルを独自のJSONファイルにすることで読み込むことができるようにしますので、別途、Python等でJSONへの変換が必要になります
 
 I created this because I thought it would be easier to analyze the results of tools that are not supported by VSCode (e.g. static confirmation or testing tools), rather than viewing them in a text file.
 
@@ -58,7 +58,8 @@ Since the text file can be read by converting it into a unique JSON file, you wi
 }
 ```
 
-1-4 Aplのチェックコード
+Line
+2-3,5 Aplのチェックコード
 
 7：filename(ファイルパス)
 
@@ -74,7 +75,7 @@ Since the text file can be read by converting it into a unique JSON file, you wi
 
 13：level(レベル 1：Red 2：Yellow 3:Blue)
 
-14：tooltip(ツールチップ )
+14：tooltip(ツールチップ)
 
 15：tags(タグ)
 

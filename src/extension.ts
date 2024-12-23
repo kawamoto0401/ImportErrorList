@@ -20,10 +20,6 @@ import { WebViewProvider } from './WebViewProvider';
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 	
-	// const rootPath = (vscode.workspace.workspaceFolders && (vscode.workspace.workspaceFolders.length > 0))
-	// 	? vscode.workspace.workspaceFolders[0].uri.fsPath : "Test";
-	// 	// ? vscode.workspace.workspaceFolders[0].uri.fsPath : undefined;
-
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "importerrorlist" is now active!');
@@ -41,9 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('extension.getTreeviewSelect', element => nodeDependenciesProvider.getTreeviewSelect( element ));
 
 	// ツリーがタイトル釦を登録
-	vscode.commands.registerCommand('nodeDependencies.refreshEntry', () => nodeDependenciesProvider.refresh());
 	vscode.commands.registerCommand('nodeDependencies.initTreeviewEntry', () => nodeDependenciesProvider.initTreeview());
-	vscode.commands.registerCommand('nodeDependencies.searchTreeviewEntry', () => nodeDependenciesProvider.searchTreeview());
 
 	vscode.commands.registerCommand('nodeDependencies.bookmark', (node: Dependency) => nodeDependenciesProvider.setbookmark(node));
 	vscode.commands.registerCommand('nodeDependencies.bookmarkAll', (node: Dependency) => nodeDependenciesProvider.setbookmarkAll(node));

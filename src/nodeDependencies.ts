@@ -4,7 +4,7 @@ import * as path from 'path';
 
 import { WebViewProvider } from './WebViewProvider';
 import { GutterIconMng } from './GutterIconMng';
-import { TreeUserData } from './TreeUserData';
+import { TreeUserData, TreeType, TreeWarningLevel, RequstData } from './TreeUserData';
 
 // ErrorDataのマスタ情報
 class UserData {
@@ -41,13 +41,6 @@ class UserData {
 		return false;
 	}
 }
-
-const treeItemWarningLevel = {
-	none: 0,
-	comment: 3,
-	warning: 2,
-	error: 1
-} as const;
 
 
 export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
@@ -89,7 +82,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 		this.refresh();
 	}
 
-	// ツリー検索
+	// ツリー検索(未対応)
 	// 検索用の画面を表示、ツリービューに反映する
 	searchTreeview(): void {
 		console.log("### searchTreeview ");
@@ -138,7 +131,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	getChildren(element?: Dependency): Thenable<Dependency[]> {
 		if (element) {
 			let treeUserData = TreeUserData.getInstance();
-			let nodeList = treeUserData.getChildrenTreeNodeList(Number(element.id));
+			let nodeList = treeUserData.getChildrenTreeNodeList(Number(element.treeType), Number(element.id));
 			if( !nodeList ) {
 				return Promise.resolve([]);					
 			}
@@ -147,17 +140,17 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 
 			for (let cnt1 = 0; cnt1 < nodeList.length; cnt1++) {
 				const element = nodeList[cnt1];
-				
-				if( 0 !== element.type ) {
+		
+				if( TreeType.data === element.treeType ) {
 					// Fileのときは、Treeの最終ノードとし、クリック時にジャンプ出来るようにする
-					dependencyList.push(new Dependency(element.name, element.type, element.id.toString(), vscode.TreeItemCollapsibleState.None, element.toolTip, {
+					dependencyList.push(new Dependency(element.name, element.id.toString(), element.treeType, element.warninglevel, vscode.TreeItemCollapsibleState.None, element.toolTip, {
 						command: 'extension.getTreeviewSelect',
 						title: '',
 						arguments: [element.id]
 					}));
 				}
 				else {
-					dependencyList.push( new Dependency( element.name, element.type, element.id.toString(), vscode.TreeItemCollapsibleState.Collapsed) );
+					dependencyList.push( new Dependency( element.name, element.id.toString(), element.treeType, element.warninglevel, vscode.TreeItemCollapsibleState.Collapsed) );
 				}
 			}
 
@@ -169,7 +162,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				// ファイル読み込み時
 
 				let treeUserData = TreeUserData.getInstance();
-				let nodeList = treeUserData.getChildrenTreeNodeList( treeUserData.treeItemID.root );
+				let nodeList = treeUserData.getChildrenTreeNodeList( TreeType.root, undefined);
 				if( !nodeList ) {
 					return Promise.resolve([]);					
 				}
@@ -179,7 +172,7 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				for (let cnt1 = 0; cnt1 < nodeList.length; cnt1++) {
 					const element = nodeList[cnt1];
 					
-					dependencyList.push( new Dependency( element.name, element.type, element.id.toString(), vscode.TreeItemCollapsibleState.Collapsed) );
+					dependencyList.push( new Dependency( element.name, element.id.toString(), element.treeType, element.warninglevel, vscode.TreeItemCollapsibleState.Collapsed) );
 				}
 
 				return Promise.resolve(dependencyList);
@@ -188,6 +181,18 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				return Promise.resolve([]);
 			}
 		}
+	}
+
+	private isFileExists(filePath: string): Promise<boolean> {
+		return new Promise((resolve, reject) => {
+			fs.access(filePath, fs.constants.F_OK, (err) => {
+				if (err) {
+					resolve(false); // ファイルが存在しないか、アクセス権限がない
+				} else {
+					resolve(true); // ファイルが存在し、アクセス可能
+				}
+			});
+		});
 	}
 
 	// Treeviewが選択された
@@ -228,19 +233,30 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 				const row = this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0 ;
 				const column = this.userDataList[index].column > 0 ? this.userDataList[index].column - 1 : 0 ;
 
-				// ファイルを開く
-				vscode.workspace.openTextDocument(filename).then(function (doc) {
-					vscode.window.showTextDocument(doc).then( (editor) => {
+				// ファイルの存在チェック
+				this.isFileExists(filename)
+					.then(exists => {
+						if (exists) {
+							// ファイルを開く
+							vscode.workspace.openTextDocument(filename).then(function (doc) {
+								vscode.window.showTextDocument(doc).then((editor) => {
 
-						// 行と列からカーソルを移動させる
-						let pos = new vscode.Position( row, column );
-						editor.selection = new vscode.Selection( pos, pos );
+									// 行と列からカーソルを移動させる
+									let pos = new vscode.Position(row, column);
+									editor.selection = new vscode.Selection(pos, pos);
 
-						// 行と列からスクリーンを移動させる
-						let range = new vscode.Range(pos, pos);
-						editor.revealRange(range);
+									// 行と列からスクリーンを移動させる
+									let range = new vscode.Range(pos, pos);
+									editor.revealRange(range);
+								});
+							});
+						} else {
+							vscode.window.showInformationMessage('Open Error:' + filename);
+						}
+					})
+					.catch(err => {
+						console.error('エラーが発生しました:', err);
 					});
-				});
 
 				return;
 			}
@@ -270,20 +286,25 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 			if (fileUri && fileUri[0]) {
 
 				try {
-
 					let fileContent = fs.readFileSync(fileUri[0].fsPath, 'utf8');
 					if( 0 >= fileContent.length ) {
-						return;
+						// eslint-disable-next-line no-throw-literal
+						throw 'length 0';
 					}
 		
 					const jsonData = JSON.parse(fileContent);
-					if(( null === jsonData ) || ( null === jsonData.ImportErrorList ) || ( null === jsonData.ImportErrorList.version )) {
-						return;
+					if( null === jsonData ) {
+						// eslint-disable-next-line no-throw-literal
+						throw 'JSON null';
 					}
-
+					if (( null === jsonData.ImportErrorList ) || ( null === jsonData.ImportErrorList.version )) {
+						// eslint-disable-next-line no-throw-literal
+						throw 'format error';
+					}
 					const version = jsonData.ImportErrorList.version;
 					if( 1 !== version ) {
-						return;
+						// eslint-disable-next-line no-throw-literal
+						throw 'Not Version';
 					}
 		
 					const data = jsonData.data;
@@ -327,13 +348,16 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	
 	
 							// TreeDataを生成する
-							treeUserData.addSubject(subject, data[cnt1].filename + ":" + data[cnt1].row, data[cnt1].row, this.id, data[cnt1].level);
-							
-							treeUserData.addFile(data[cnt1].filename, data[cnt1].row + ":" + subject, data[cnt1].row, this.id, data[cnt1].level);
+							let requstData: RequstData = {name: data[cnt1].filename + ":" + data[cnt1].row, row: data[cnt1].row, dataID: this.id, toolTip: "", warninglevel: data[cnt1].level};
+							treeUserData.addSubject(subject, requstData);
+
+							requstData.name = data[cnt1].row + ":" + subject;							
+							treeUserData.addFile(data[cnt1].filename, requstData);
 	
 							for (let cnt2 = 0; cnt2 < taglist.length; cnt2++) {
 								const element = taglist[cnt2];
-								treeUserData.addTag(element, data[cnt1].filename + ":" + data[cnt1].row, data[cnt1].row, this.id, data[cnt1].level);
+								requstData.name = data[cnt1].filename + ":" + data[cnt1].row;
+								treeUserData.addTag(element, requstData);
 							}
 	
 							this.id++;
@@ -349,12 +373,16 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 						treeUserData.pruneFile();
 	
 						// デバッグ用
-						// treeUserData.output();
+						treeUserData.output();
 
 						this.refresh();
 					});
-				} catch(e) {
-					vscode.window.showInformationMessage('JSON Error');
+				} catch(err) {
+					if (typeof err === 'string') {
+						vscode.window.showInformationMessage('JSON Error:' + err);
+					} else {
+						vscode.window.showInformationMessage('JSON Error:unkown');
+					}
 				}
 			}
 		});
@@ -382,24 +410,35 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 					const row = this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0 ;
 					const column = this.userDataList[index].column > 0 ? this.userDataList[index].column - 1 : 0 ;
 					const level = this.userDataList[index].level;
-	
-					// 非同期はthiisが使えないため参照する
-					let gutterIconMng = this.gutterIconMng;
-	
-					// ファイルを開く
-					vscode.workspace.openTextDocument(filename).then(function (doc) {
-						vscode.window.showTextDocument(doc).then( (editor) => {
-	
-							// 行と列からカーソルは移動しない
-							let pos = new vscode.Position( row, column );
-	
-							// 行と列からスクリーンを移動させる
-							let range = new vscode.Range(pos, pos);
-							editor.revealRange(range);
 
-							// ガーターアイコンを追加
-							gutterIconMng.setGutterIconMng( editor, filename, [row], level );
-						});
+					// ファイルの存在チェック
+					this.isFileExists(filename)
+					.then(exists => {
+						if (exists) {
+							// 非同期はthiisが使えないため参照する
+							let gutterIconMng = this.gutterIconMng;
+			
+							// ファイルを開く
+							vscode.workspace.openTextDocument(filename).then(function (doc) {
+								vscode.window.showTextDocument(doc).then( (editor) => {
+			
+									// 行と列からカーソルは移動しない
+									let pos = new vscode.Position( row, column );
+			
+									// 行と列からスクリーンを移動させる
+									let range = new vscode.Range(pos, pos);
+									editor.revealRange(range);
+
+									// ガーターアイコンを追加
+									gutterIconMng.setGutterIconMng( editor, filename, [row], level );
+								});
+							});
+						} else {
+							return;
+						}
+					})
+					.catch(err => {
+						console.error('エラーが発生しました:', err);
 					});
 	
 					return;
@@ -411,68 +450,91 @@ export class DepNodeProvider implements vscode.TreeDataProvider<Dependency> {
 	public setbookmarkAll( element?: Dependency ){
 
 		if (element) {
-
 			// TreeのIDからリストのIDに変換
 			let treeUserData = TreeUserData.getInstance();
-			let node = treeUserData.getTreeNode(Number(element.id));
-			if( !node ) {
+
+			// IDから子のIDに変換
+			let nodeChildList = treeUserData.getChildrenTreeNodeList( TreeType.node, Number(element.id));
+			if( !nodeChildList ) {
 				return;
 			}
 
-			const userId = node.dataID;
-
-			let filename : string = "";
-			let row = 0;
-			let column = 0;
-
-			// ErorrListから対象のIDのファイル名を取得
-			for (let index = 0; index < this.userDataList.length; index++) {
-				const id = this.userDataList[index].id;
-				if( userId === id ) {
-					filename = this.userDataList[index].filename;
-					row = this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0 ;
-					column = this.userDataList[index].column > 0 ? this.userDataList[index].column - 1 : 0 ;
-					break;
-				}
-			}
-			if( 0 === filename.length ) {
-				return;
-			}
-
-			// level毎にガーターアイコンを追加
-			for (let cnt1 = 1; cnt1 <= 3; cnt1++) {
-
-				let rows : number[] = [];
-				let level = cnt1;
-
+			// IDからUserDataを取得
+			let taggetUserDataList : UserData[] = [];
+			for (const el of nodeChildList) {
 				for (let index = 0; index < this.userDataList.length; index++) {
-					if( filename === this.userDataList[index].filename && cnt1 === this.userDataList[index].level ) {
-						rows.push(this.userDataList[index].row > 0 ? this.userDataList[index].row - 1 : 0);
+					const id = this.userDataList[index].id;
+					if( el.dataID === id ) {
+						taggetUserDataList.push( this.userDataList[index] );						
+						break;
+					}
+				}				
+			}
+			if( !taggetUserDataList ) {
+				return;
+			}
+
+			interface GutterFileData {
+				fileName: string;
+				lines: { row: number; column: number; level: number }[];
+			}
+			let gutterFileDataList : GutterFileData[] = [];
+			for (const el of taggetUserDataList) {
+				let isHit = false;
+				for (let index = 0; index < gutterFileDataList.length; index++) {
+	
+					if( el.filename === gutterFileDataList[index].fileName ) {
+
+						gutterFileDataList[index].lines.push( { row: el.row > 0 ? el.row - 1 : 0, column: el.column > 0 ? el.column - 1 : 0, level: el.level } );
+
+						isHit = true;
+						break;
 					}
 				}
-				if( 0 === rows.length ) {
-					continue;
+				if( !isHit ) {
+					let lines : { row: number; column: number; level: number }[] = [{ row: el.row > 0 ? el.row - 1 : 0, column: el.column > 0 ? el.column - 1 : 0, level: el.level }];
+					gutterFileDataList.push( { fileName: el.filename, lines: lines } );
 				}
+			}
 
-				// 非同期はthiisが使えないため参照する
-				let gutterIconMng = this.gutterIconMng;
-	
-				// ファイルを開く
-				vscode.workspace.openTextDocument(filename).then(function (doc) {
-					vscode.window.showTextDocument(doc).then( (editor) => {
-	
-						// 行と列からカーソルは移動しない
-						let pos = new vscode.Position( row, column );
-	
-						// 行と列からスクリーンを移動させる
-						let range = new vscode.Range(pos, pos);
-						editor.revealRange(range);
-	
-						// ガーターアイコンを追加
-						gutterIconMng.setGutterIconMng( editor, filename, rows, level );
-					});
-				});				
+
+			for (const gutterFileData of gutterFileDataList) {
 				
+				// ファイルの存在チェック
+				this.isFileExists(gutterFileData.fileName)
+					.then(exists => {
+						if (exists) {
+							// level毎にガーターアイコンを追加
+							for (let cnt1 = 1; cnt1 <= 3; cnt1++) {
+
+								let rows: number[] = [];
+								let level = cnt1;
+
+								for (let index = 0; index < gutterFileData.lines.length; index++) {
+									if (cnt1 === gutterFileData.lines[index].level) {
+										rows.push(gutterFileData.lines[index].row);
+									}
+								}
+								if (0 === rows.length) {
+									continue;
+								}
+
+								// 非同期はthiisが使えないため参照する
+								let gutterIconMng = this.gutterIconMng;
+
+								// ファイルを開く
+								vscode.workspace.openTextDocument(gutterFileData.fileName).then(function (doc) {
+									vscode.window.showTextDocument(doc).then((editor) => {
+										// ガーターアイコンを追加
+										gutterIconMng.setGutterIconMng(editor, gutterFileData.fileName, rows, level);
+									});
+								});
+							}							
+						}
+					})
+					.catch(err => {
+						console.error('エラーが発生しました:', err);
+					});
 			}
 		}
 	}
@@ -516,8 +578,9 @@ export class Dependency extends vscode.TreeItem {
 
 	constructor(
 		public readonly label: string,
-		public readonly type: number,
 		public readonly id: string,
+		public readonly treeType: number,
+		public readonly warninglevel: number,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 		public readonly tooltip?: string,
 		public readonly command?: vscode.Command
@@ -526,40 +589,49 @@ export class Dependency extends vscode.TreeItem {
 
 		this.tooltip = tooltip;
 
-		switch (type) {
-			case treeItemWarningLevel.none:
-				this.iconPath = {
-					light: path.join(__filename, '..', '..', 'resources', 'light', 'folder.svg'),
-					dark: path.join(__filename, '..', '..', 'resources', 'dark', 'folder.svg')
-				};
-				break;
-
-			case treeItemWarningLevel.comment:
-				this.iconPath = {
-					light: path.join(__filename, '..', '..', 'resources', 'light', 'file_b.svg'),
-					dark: path.join(__filename, '..', '..', 'resources', 'dark', 'file_b.svg')
-				};
-				this.contextValue = 'dependency';
-				break;
-
-			case treeItemWarningLevel.warning:
-				this.iconPath = {
-					light: path.join(__filename, '..', '..', 'resources', 'light', 'file_e.svg'),
-					dark: path.join(__filename, '..', '..', 'resources', 'dark', 'file_e.svg')
-				};
-
-				this.contextValue = 'dependency';
-				break;
-
-			case treeItemWarningLevel.error:
-			default:
+		if( treeType === TreeType.data ) {
+			switch (warninglevel) {
+				case TreeWarningLevel.comment:
 					this.iconPath = {
-					light: path.join(__filename, '..', '..', 'resources', 'light', 'file_r.svg'),
-					dark: path.join(__filename, '..', '..', 'resources', 'dark', 'file_r.svg')
-				};
-
-				this.contextValue = 'dependency';
-				break;
+						light: path.join(__filename, '..', '..', 'resources', 'light', 'bookmark_b.svg'),
+						dark: path.join(__filename, '..', '..', 'resources', 'dark', 'bookmark_b.svg')
+					};
+					this.contextValue = 'ContextErrorCode';
+					break;
+	
+				case TreeWarningLevel.warning:
+					this.iconPath = {
+						light: path.join(__filename, '..', '..', 'resources', 'light', 'bookmark_y.svg'),
+						dark: path.join(__filename, '..', '..', 'resources', 'dark', 'bookmark_y.svg')
+					};
+	
+					this.contextValue = 'ContextErrorCode';
+					break;
+	
+				case TreeWarningLevel.none:
+				case TreeWarningLevel.error:
+				default:
+						this.iconPath = {
+						light: path.join(__filename, '..', '..', 'resources', 'light', 'bookmark_r.svg'),
+						dark: path.join(__filename, '..', '..', 'resources', 'dark', 'bookmark_r.svg')
+					};
+	
+					this.contextValue = 'ContextErrorCode';
+					break;
+			}
+		}
+		else if (treeType === TreeType.node) {
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', 'resources', 'light', 'file.svg'),
+				dark: path.join(__filename, '..', '..', 'resources', 'dark', 'file.svg')
+			};
+			this.contextValue = 'ContextFile';
+		}
+		else {
+			this.iconPath = {
+				light: path.join(__filename, '..', '..', 'resources', 'light', 'folder.svg'),
+				dark: path.join(__filename, '..', '..', 'resources', 'dark', 'folder.svg')
+			};
 		}
 	}
 }

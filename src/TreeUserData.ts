@@ -3,7 +3,34 @@ import Tree from 'ts-tree-structure';
 import type { Node } from 'ts-tree-structure';;
 
 
-type NodeType = { id: number, name: string, row: number, dataID: number, toolTip: string, type: number};
+type NodeType = { id: number, name: string, row: number, dataID: number, toolTip: string, treeType: number, warninglevel: number};
+
+
+export interface RequstData {
+    name: string;
+    row: number;
+    dataID: number;
+    toolTip: string;
+    warninglevel: TreeWarningLevel;
+}
+
+export enum TreeType {
+    none = 0,
+    root = 1,
+    subjectRoot = 10,
+    fileRoot = 11,
+    tagRoot = 12,
+    dir = 13,
+    node = 14,
+    data = 15,
+}
+
+export enum TreeWarningLevel {
+    none = 0,
+    error = 1,
+    warning = 2,
+    comment = 3
+}
 
 // ツリーデータの内部データ
 export class TreeUserData {
@@ -26,29 +53,10 @@ export class TreeUserData {
         return this._instance;
     }
 
-
     private tree: Tree | undefined;
     private root: any | undefined;
-    private count: number = 0;
-
-    public treeItemID = {
-        none: 0,                //
-        root: 1,                // ↓固定
-        subjectRoot: 10,
-        fileRoot: 11,
-        tagRoot: 12,
-        dir: 13,
-        file: 14,
-        user: 100               // ↓これ以降を通常は使用
-    } as const;
-
-    public treeItemWarningLevel = {
-        none: 0,
-        comment: 3,
-        warning: 2,
-        error: 1
-    } as const;
-
+    private count: number = 100;
+   
     /**
      * コンストラクタ
      */
@@ -71,37 +79,74 @@ export class TreeUserData {
             return;
         }
 
-        let root = this.tree.parse({
-            id: 1,
+        let root = this.tree.parse<NodeType>({
+            id: TreeType.root,
             name: "",
             toolTip: "",
-            type: this.treeItemWarningLevel.none,
+            treeType: TreeType.root,
+            warninglevel: TreeWarningLevel.none, 
+            row: 0,
+            dataID: 0,
             children: [
             {
-                id: this.treeItemID.subjectRoot,
+                id: 0,
                 name: "Subject",
                 toolTip: "",
-                type: this.treeItemWarningLevel.none,
+                treeType: TreeType.subjectRoot, 
+                warninglevel: TreeWarningLevel.none,
+                row: 0,
+                dataID: 0,
                 children: [],
             },
             {
-                id: this.treeItemID.fileRoot,
+                id: TreeType.fileRoot,
                 name: "File",
                 toolTip: "",
-                type: this.treeItemWarningLevel.none,
+                treeType: TreeType.fileRoot,
+                warninglevel: TreeWarningLevel.none,
+                row: 0,
+                dataID: 0,
                 children: [],
             },
             {
-                id: this.treeItemID.tagRoot,
+                id: TreeType.tagRoot,
                 name: "Tag",
                 toolTip: "",
-                type: this.treeItemWarningLevel.none,
+                treeType: TreeType.tagRoot,
+                warninglevel: TreeWarningLevel.none,
+                row: 0,
+                dataID: 0,
                 children: [],
             },
             ],
         });
 
         this.root = root;
+    }
+
+    
+    private getNodeTreeType(node: Node<NodeType> | undefined, treeType: TreeType) : Node<NodeType> | undefined {
+
+        if(( !this.tree ) || (( !this.root ))){
+            return;
+        }
+
+        if( !node ) {
+            node = this.root;
+            if( !node ) {
+                return undefined;
+            }
+        }
+
+        for (let index = 0; index < node.children.length; index++) {
+            const element = node.children[index];
+
+            if( treeType === element.model.treeType) {
+                return element;
+            }
+        }
+
+        return undefined;
     }
 
     private getNode(node: Node<NodeType> | undefined, id: number) : Node<NodeType> | undefined {
@@ -129,12 +174,12 @@ export class TreeUserData {
     }
 
 
-    public addTag(folderName: string, str: string, row: number, dataId: number, level: number){
+    public addTag(folderName: string, requstData: RequstData){
         if(( !this.tree ) || (( !this.root ))){
             return;
         }
 
-        let node = this.getNode(undefined, this.treeItemID.tagRoot);
+        let node = this.getNodeTreeType(undefined, TreeType.tagRoot);
         if( !node ) {
             return;
         }
@@ -150,22 +195,23 @@ export class TreeUserData {
             }
         }
         if( !isHit ) {
-            node = this.addChild( node, folderName, row, 0, str, this.treeItemWarningLevel.none);
+            let requstDataParmet = {name: folderName, row: requstData.row, dataID: 0, toolTip: "", warninglevel: TreeWarningLevel.none};
+            node = this.addChild( node, requstDataParmet, TreeType.node );
             if( node === undefined ) {
                 return;
             }
         }
 
-        this.addChild( node, str, row, dataId, str, level);
+        this.addChild( node, requstData, TreeType.data );
     }
 
-    public addSubject(folderName: string, str: string, row: number, dataId: number, level: number){
+    public addSubject(folderName: string, requstData: RequstData){
 
         if(( !this.tree ) || (( !this.root ))){
             return;
         }
 
-        let node = this.getNode(undefined, this.treeItemID.subjectRoot);
+        let node = this.getNodeTreeType(undefined, TreeType.subjectRoot);
         if( !node ) {
             return;
         }
@@ -181,23 +227,35 @@ export class TreeUserData {
             }
         }
         if( !isHit ) {
-            node = this.addChild( node, folderName, row, 0, str, this.treeItemWarningLevel.none);
+            let requstDataParmet = {name: folderName, row: requstData.row, dataID: 0, toolTip: "", warninglevel: TreeWarningLevel.none};
+            node = this.addChild( node, requstDataParmet, TreeType.node );
             if( node === undefined ) {
                 return;
             }
         }
 
-        this.addChild( node, str, row, dataId, str, level);
+        this.addChild( node, requstData, TreeType.data );
    }
 
-    public addFile(filePath: string, str: string, row: number, dataId: number, level: number){
+    public addFile(filePath: string, requstData: RequstData){
 
         if(( !this.tree ) || (( !this.root ))){
             return;
         }
 
         // パス区切り文字で分割
-        const pathArray = filePath.split(/[/\\]/);
+        let pathArray : string[] = [];
+        if (filePath.startsWith("\\\\")) {
+            pathArray = filePath.substring(2).split(/[/\\]/);
+            pathArray[0] = "\\\\" + pathArray[0];
+        }
+        else  if (filePath.startsWith("\\")) {
+            pathArray = filePath.substring(1).split(/[/\\]/);
+            pathArray[0] = "\\" + pathArray[0];
+        }
+        else {
+            pathArray = filePath.split(/[/\\]/);
+        }
         if( pathArray.length === 0 ) {
             return;
         }
@@ -207,16 +265,16 @@ export class TreeUserData {
             pathCnt = 1;
         }
 
-        let node = this.getNode( undefined, this.treeItemID.fileRoot);
+        let node = this.getNodeTreeType( undefined, TreeType.fileRoot);
         if( !node ) {
             return;
         }
 
-        this.addFileRecursion( 0, node, filePath, pathArray, str, pathCnt, row, dataId, level);
+        this.addFileRecursion( 0, node, filePath, pathArray, pathCnt, requstData);
     }
 
 
-    private addFileRecursion(num : number, node : Node<NodeType>, filePath: string, pathArray: string[], str: string, pathCnt: number, row: number, dataId: number, level: number){
+    private addFileRecursion(num : number, node : Node<NodeType>, filePath: string, pathArray: string[], pathCnt: number, requstData: RequstData){
 
         if(( !this.tree ) || (( !this.root ))){
             return;
@@ -227,12 +285,13 @@ export class TreeUserData {
            for (let index2 = pathCnt; index2 < pathArray.length; index2++) {
                 const element = pathArray[index2];
 
-                let dataId : number = this.treeItemID.dir;
+                let treeType: TreeType = TreeType.dir;
                 if( index2 === pathArray.length - 1 ) {
-                    dataId = this.treeItemID.file;
+                    treeType = TreeType.node;
                 }
 
-                let nodeTmp = this.addChild( node, element, row, dataId, "", this.treeItemWarningLevel.none, false );
+                let requstDataParmet = {name: element, row: requstData.row, dataID: 0, toolTip: "", warninglevel: TreeWarningLevel.none};
+                let nodeTmp = this.addChild( node, requstDataParmet, treeType, false );
                 if( nodeTmp === undefined ) {
                     return;
                 }
@@ -240,7 +299,7 @@ export class TreeUserData {
             }
 
             // エラー名を追加
-            this.addChild( node, str, row, dataId, str, level, true );
+            this.addChild( node, requstData, TreeType.data, true );
         }
         // 子があるときは、重複しないかを確認する
         else {
@@ -250,7 +309,7 @@ export class TreeUserData {
                 if(element.model.name === pathArray[pathCnt] ) {
                     // 一致なら次の文字へ
                     pathCnt++;
-                    this.addFileRecursion(num + 1, element, filePath, pathArray, str, pathCnt, row, dataId, level);
+                    this.addFileRecursion(num + 1, element, filePath, pathArray, pathCnt, requstData);
                     return;
                 }
             }
@@ -259,12 +318,13 @@ export class TreeUserData {
             for (let index2 = pathCnt; index2 < pathArray.length; index2++) {
                 const element = pathArray[index2];
 
-                let dataId : number = this.treeItemID.dir;
+                let treeType : number = TreeType.dir;
                 if( index2 === pathArray.length - 1 ) {
-                    dataId = this.treeItemID.file;
+                    treeType = TreeType.node;
                 }
 
-                let nodeTmp  = this.addChild( node, element, row, dataId, "", this.treeItemWarningLevel.none, false );
+                let requstDataParmet = {name: element, row: requstData.row, dataID: 0, toolTip: "", warninglevel: TreeWarningLevel.none};
+                let nodeTmp  = this.addChild( node, requstDataParmet, treeType, false );
                 if( nodeTmp === undefined ) {
                     return;
                 }
@@ -273,20 +333,20 @@ export class TreeUserData {
             }
 
              // エラー名を追加
-             this.addChild( node, str, row, dataId, str, level, true );
+             this.addChild( node, requstData, TreeType.data, true );
         }
 
         return;
     }
 
     //
-    private addChild(node : Node<NodeType>, str: string, row: number, dataId: number, toolTipStr: string, level: number, isLine = false) : Node<NodeType> | undefined{
+    private addChild(node : Node<NodeType>, requstData: RequstData, treeType: TreeType, isLine = false) : Node<NodeType> | undefined{
 
         if(( !this.tree ) || (( !this.root ))){
             return undefined;
         }
 
-        let idTmp = this.treeItemID.user + this.count;
+        let idTmp = this.count;
         this.count++;
 
         let nodeResult;
@@ -296,33 +356,29 @@ export class TreeUserData {
             const element = node.children[index];
 
             if( isLine ) {
-                if( element.model.row === row ) {
-                    if( element.model.name > str ) {
+                if( element.model.row === requstData.row ) {
+                    if( element.model.name > requstData.name ) {
                         break;
                     }
                 }else {
-                    if( element.model.row > row ) {
+                    if( element.model.row > requstData.row ) {
                         break;
                     }
                 }
             }else {
-                if( element.model.name === str ) {
-                    if( element.model.row > row ) {
+                if( element.model.name === requstData.name ) {
+                    if( element.model.row > requstData.row ) {
                         break;
                     }
                 }else {
-                    if( element.model.name > str ) {
+                    if( element.model.name > requstData.name ) {
                         break;
                     }
                 }
             }
         }
 
-        if( this.treeItemWarningLevel.comment === level || this.treeItemWarningLevel.warning === level || this.treeItemWarningLevel.error === level || this.treeItemWarningLevel.none === level ) {
-            nodeResult = node.addChildAtIndex(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: toolTipStr, type: level }), index);
-        }else {
-            nodeResult = node.addChildAtIndex(this.tree.parse({ id: idTmp, name: str, row:row, dataID: dataId, toolTip: toolTipStr, type: this.treeItemWarningLevel.error }), index);
-        }
+        nodeResult = node.addChildAtIndex(this.tree.parse({ id: idTmp, name: requstData.name, row: requstData.row, dataID: requstData.dataID, toolTip: requstData.toolTip, treeType: treeType, warninglevel: requstData.warninglevel }), index);
 
         return nodeResult;
     }
@@ -334,7 +390,7 @@ export class TreeUserData {
             return;
         }
 
-        let node = this.getNode( undefined, this.treeItemID.fileRoot);
+        let node = this.getNode( undefined, TreeType.fileRoot);
         if( !node ) {
             return;
         }
@@ -353,18 +409,18 @@ export class TreeUserData {
             return;
         }
 
-        if( node.model.dataID !== this.treeItemID.dir ) {
+        if( node.model.dataID !== TreeType.dir ) {
             return;
         }
 
         // 子が1つの時は、親に孫を移動させる
         if( node.children.length === 1 ) {
-            if( node.children[0].model.dataID === this.treeItemID.file ) {
+            if( node.children[0].model.dataID === TreeType.node ) {
                 return;
             }
 
             // 子の名称を親に付け足す
-            node.model.name = node.model.name + '/' + node.children[0].model.name;
+            node.model.name = node.model.name + '\\' + node.children[0].model.name;
 
             // 孫のノードを親にぶら下げる
             for (let index = 0; index < node.children[0].children.length; index++) {
@@ -408,27 +464,39 @@ export class TreeUserData {
         return { name: node.model.name, dataID: node.model.dataID, toolTip: node.model.toolTip, type: node.model.type };
     }
 
-    public getChildrenTreeNodeList(id: number): { id: number, name: string, dataID: number, toolTip: string, type: number }[] | undefined {
+    public getChildrenTreeNodeList(treeType: number, id: number | undefined): { id: number, name: string, dataID: number, toolTip: string, treeType: number, warninglevel:number }[] | undefined {
 
         if(( !this.tree ) || (( !this.root ))){
             return;
         }
 
-        const idEq = (id: number) => (node: Node<NodeType>) => {
-            return node.model.id === id;
-        };
+        let node;        
+        if( id === undefined ) {
+            const idEq = (treeType: number) => (node: Node<NodeType>) => {
+                return (node.model.treeType === treeType );
+            };
 
-        let node = this.root.first(idEq(id));
-        if(!node){
-            return;
+            node = this.root.first(idEq(treeType));
+            if(!node){
+                return;
+            }            
+        }else {
+            const idTreeTypeEq = (treeType: number, id: number) => (node: Node<NodeType>) => {
+                return (node.model.id === id ) && (node.model.treeType === treeType);
+            };
+
+            node = this.root.first(idTreeTypeEq(treeType, id));
+            if(!node){
+                return;
+            }
         }
 
-        let nodelist: { id: number, name: string; dataID: number, toolTip: string, type: number  }[] = [];
+        let nodelist: { id: number, name: string; dataID: number, toolTip: string, treeType: number, warninglevel: number  }[] = [];
 
         for (let index = 0; index < node.children.length; index++) {
             const element = node.children[index];
 
-            nodelist.push({id: element.model.id, name: element.model.name, dataID: element.model.dataID, toolTip: element.model.toolTip, type: element.model.type });
+            nodelist.push({id: element.model.id, name: element.model.name, dataID: element.model.dataID, toolTip: element.model.toolTip, treeType: element.model.treeType, warninglevel: element.model.warninglevel});
         }
 
         return nodelist;
@@ -444,7 +512,7 @@ export class TreeUserData {
         for (let index = 0; index < this.root.children.length; index++) {
             const element = this.root.children[index];
 
-            console.log(element.model.id + " " + element.model.name + " " + element.model.dataID);
+            console.log(element.model.id + " " + element.model.name + " " + element.model.dataID + " " + element.model.treeType);
 
             this.outputRecursion( 1, element );
         }
@@ -460,7 +528,7 @@ export class TreeUserData {
         for (let index = 0; index < node.children.length; index++) {
             const element = node.children[index];
 
-            console.log(tab + element.model.id + " " + element.model.name + " " + element.model.dataID);
+            console.log(tab + element.model.id + " " + element.model.name + " " + element.model.dataID + " " + element.model.treeType);
 
             this.outputRecursion( num + 1, element );
         }

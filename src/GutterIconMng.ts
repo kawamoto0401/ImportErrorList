@@ -10,7 +10,7 @@ import { TextEditorDecorationType } from "vscode";
 export class GutterIconMng {
 
     public readonly placeholderDecorationUri = Uri.file(
-        path.join(__dirname, "..", "resources", "dark", "file_r.svg")
+        path.join(__dirname, "..", "resources", "dark", "bookmark_r.svg")
     );
 
     public readonly placeholderDecoration = vscode.window.createTextEditorDecorationType(
@@ -37,19 +37,19 @@ export class GutterIconMng {
     // ハッシュに登録する
     setGutterIconMng( editor: vscode.TextEditor, filename : string, rows : number[], level: number) {
 
-        let svgUri = Uri.joinPath(this.svgDir, "file_r.svg");
+        let svgUri = Uri.joinPath(this.svgDir, "bookmark_r.svg");
         switch (level) {
             case 3:
-                svgUri = Uri.joinPath(this.svgDir, "file_b.svg");
+                svgUri = Uri.joinPath(this.svgDir, "bookmark_b.svg");
                 break;
 
             case 2:
-                svgUri = Uri.joinPath(this.svgDir, "file_e.svg");
+                svgUri = Uri.joinPath(this.svgDir, "bookmark_y.svg");
                 break;
 
             case 1:
             default:
-                svgUri = Uri.joinPath(this.svgDir, "file_r.svg");
+                svgUri = Uri.joinPath(this.svgDir, "bookmark_r.svg");
                 break;
         }
 
