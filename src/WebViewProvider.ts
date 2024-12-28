@@ -24,12 +24,12 @@ export class WebViewProvider implements vscode.WebviewViewProvider {
         <title>WebView Example</title>
       </head>
       <body>
-      <label fot="description">subject : ${subject}</label>
-      <br>
+      <label fot="description">subject : <br>${subject}</label>
+      <br><br>
       <body>
-      <label fot="description">description : ${description}</label>
-      <br>
-      <label fot="commnent">commnent : ${commnent}</label>
+      <label fot="description">description : <br>${description}</label>
+      <br><br>
+      <label fot="commnent">commnent : <br>${commnent}</label>
       </body>
       </html>
     `;
