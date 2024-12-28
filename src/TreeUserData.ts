@@ -409,13 +409,13 @@ export class TreeUserData {
             return;
         }
 
-        if( node.model.dataID !== TreeType.dir ) {
+        if( node.model.treeType !== TreeType.dir ) {
             return;
         }
 
         // 子が1つの時は、親に孫を移動させる
         if( node.children.length === 1 ) {
-            if( node.children[0].model.dataID === TreeType.node ) {
+            if( node.children[0].model.treeType === TreeType.node ) {
                 return;
             }
 
